@@ -1,0 +1,151 @@
+package org.molgenis.vcf.straglr.utils;
+
+import htsjdk.samtools.SAMSequenceDictionary;
+import htsjdk.samtools.SAMSequenceRecord;
+import htsjdk.samtools.reference.IndexedFastaSequenceFile;
+import htsjdk.samtools.reference.ReferenceSequence;
+import htsjdk.variant.variantcontext.*;
+import htsjdk.variant.vcf.VCFHeader;
+import htsjdk.variant.vcf.VCFHeaderLine;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.molgenis.vcf.straglr.model.Locus;
+import org.molgenis.vcf.straglr.model.Read;
+import org.molgenis.vcf.straglr.model.ReadStatus;
+import org.molgenis.vcf.straglr.model.VariantKey;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+import java.util.*;
+
+@ExtendWith(MockitoExtension.class)
+class VcfUtilsTest {
+
+  @Test
+  void testCreateStrVcfLine_SkippedReads_ReturnsNull() {
+    IndexedFastaSequenceFile fasta = mock(IndexedFastaSequenceFile.class);
+    Locus locus = mock(Locus.class);
+    VariantKey key = new VariantKey("chr1", 100, 103);
+    Read skipped = mock(Read.class);
+    when(skipped.readStatus()).thenReturn(ReadStatus.SKIPPED_NOT_SPANNING);
+    List<Read> reads = List.of(skipped);
+    VariantContext result = VcfUtils.createStrVcfLine(key, reads, List.of(), fasta, Map.of(key, locus), "SAMPLE");
+    assertNull(result);
+  }
+
+  @Test
+  void testCreateStrVcfLine_HaploidContig_SingleAllele() {
+    IndexedFastaSequenceFile fasta = mock(IndexedFastaSequenceFile.class);
+    Locus locus = mock(Locus.class);
+    when(locus.catalogRepeatUnit()).thenReturn("AT");
+    when(locus.identifier()).thenReturn("STR1");
+    VariantKey key = new VariantKey("chr1", 100, 103);
+    ReferenceSequence refSeq = mock(ReferenceSequence.class);
+    when(refSeq.getBaseString()).thenReturn("A");
+    when(fasta.getSubsequenceAt(eq("chr1"), eq(100L), eq(100L))).thenReturn(refSeq);
+
+    Read read1 = readMock("12.0", ReadStatus.FULL, "AT");
+    List<Read> reads = List.of(read1);
+    List<String> haploidContigs = List.of("chr1");
+
+    VariantContext vc = VcfUtils.createStrVcfLine(key, reads, haploidContigs, fasta, Map.of(key, locus), "SAMPLE");
+    assertNotNull(vc);
+    assertEquals("PASS", vc.getFilters().stream().findFirst().get());
+    assertEquals(1, vc.getGenotypes().size());
+    assertEquals(103, vc.getAttributeAsInt("END", 0));
+    assertTrue((Boolean) vc.getAttribute("RU_MATCH"));
+  }
+
+  @Test
+  void testCreateStrVcfLine_DiploidContig_DuplicateAllele() {
+    IndexedFastaSequenceFile fasta = mock(IndexedFastaSequenceFile.class);
+    Locus locus = mock(Locus.class);
+    when(locus.catalogRepeatUnit()).thenReturn("AT");
+    when(locus.identifier()).thenReturn("STR1");
+    VariantKey key = new VariantKey("chr1", 100, 103);
+
+    ReferenceSequence refSeq = mock(ReferenceSequence.class);
+    when(refSeq.getBaseString()).thenReturn("A");
+    when(fasta.getSubsequenceAt(eq("chr1"), eq(100L), eq(100L))).thenReturn(refSeq);
+
+    Read read1 = readMock("12.0", ReadStatus.FULL, "AT");
+    List<Read> reads = List.of(read1);
+    List<String> diploidContigs = List.of();  // chr1 not haploid
+
+    VariantContext vc = VcfUtils.createStrVcfLine(key, reads, diploidContigs, fasta, Map.of(key, locus), "SAMPLE");
+    assertEquals(2, vc.getGenotype(SAMPLE_NAME).getAlleles().size());  // 0/0
+  }
+
+  @Test
+  void testCreateStrVcfLine_WithFilters() {
+    IndexedFastaSequenceFile fasta = mock(IndexedFastaSequenceFile.class);
+    Locus locus = mock(Locus.class);
+    when(locus.catalogRepeatUnit()).thenReturn("AT");
+    when(locus.identifier()).thenReturn("STR1");
+    VariantKey key = new VariantKey("chr1", 100, 103);
+    Read full = readMock("10.0", ReadStatus.FULL, "AT");
+    Read partial = readMock("12.0", ReadStatus.FAILED_MOTIF_SIZE_OUT_OF_RANGE, "AT");
+    List<Read> reads = List.of(full, partial);
+
+    ReferenceSequence refSeq = mock(ReferenceSequence.class);
+    when(refSeq.getBaseString()).thenReturn("A");
+    when(fasta.getSubsequenceAt(anyString(), anyLong(), anyLong())).thenReturn(refSeq);
+
+    VariantContext vc = VcfUtils.createStrVcfLine(key, reads, List.of(), fasta, Map.of(key, locus), "SAMPLE");
+    assertEquals("FAILED_MOTIF_SIZE_OUT_OF_RANGE", vc.getFilters().stream().findFirst().get());
+  }
+
+  @Test
+  void testParseAlleleInt() throws Exception {
+    assertEquals(10, VcfUtils.parseAlleleInt("10.0"));
+    assertEquals(12, VcfUtils.parseAlleleInt(" 12.0 "));
+  }
+
+  @Test
+  void testVariantComparator() {
+    VariantContext vc1 = new VariantContextBuilder("test", "chr1", 100, 100, List.of(Allele.REF_A)).make();
+    VariantContext vc2 = new VariantContextBuilder("test", "chr1", 200, 200, List.of(Allele.REF_A)).make();
+    VariantContext vc3 = new VariantContextBuilder("test", "chr2", 100, 100, List.of(Allele.REF_A)).make();
+
+    Comparator<VariantContext> comp = VcfUtils.variantComparator();
+    assertEquals(-1, comp.compare(vc1, vc2));
+    assertEquals(-1, comp.compare(vc1, vc3));
+    assertEquals(1, comp.compare(vc3, vc1));
+  }
+
+  @Test
+  void testCreateStrVcfHeader_ContigHeaders() {
+    IndexedFastaSequenceFile fasta = mock(IndexedFastaSequenceFile.class);
+    SAMSequenceRecord seq1 = new SAMSequenceRecord("chr1", 1000);
+    SAMSequenceDictionary dict = new SAMSequenceDictionary(List.of(seq1));
+    when(fasta.getSequenceDictionary()).thenReturn(dict);
+
+    VCFHeader header = VcfUtils.createStrVcfHeader(List.of(), fasta, "SAMPLE");
+    assertEquals(1, header.getContigLines().size());
+    assertEquals("chr1", header.getContigLines().get(0).getID());
+  }
+
+  @Test
+  void testAddAltHeaders() {
+    Allele alt1 = Allele.create("<STR10>");
+    Allele alt2 = Allele.create("<STR12>");
+    VariantContext vc = new VariantContextBuilder("test", "chr1", 100, 100, List.of(Allele.REF_A, alt1, alt2)).make();
+
+    Set<VCFHeaderLine> lines = new HashSet<>();
+    VcfUtils.addAltHeaders(lines, List.of(vc));
+    assertEquals(2, lines.size());
+    assertTrue(lines.stream().anyMatch(l -> l.getKey().equals("ALT") && l.toString().contains("Short tandem repeat (STR) allele of length 12.")));
+  }
+
+  private static Read readMock(String allele, ReadStatus status, String actual) {
+    Read read = mock(Read.class);
+    when(read.allele()).thenReturn(allele);
+    when(read.readStatus()).thenReturn(status);
+    when(read.actualRepeat()).thenReturn(actual);
+    return read;
+  }
+
+  private static final String SAMPLE_NAME = "SAMPLE";
+}

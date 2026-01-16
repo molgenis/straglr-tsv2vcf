@@ -37,7 +37,7 @@ public class FileUtils {
           line.getStart() + 1,
           line.getStop() + 1
       );
-      lookup.put(key, new Locus(line.getChrom(), line.getStart(), line.getStop(),
+      lookup.put(key, new Locus(line.getChrom(), line.getStart() + 1, line.getStop() + 1,
           line.getRepeatUnit(), line.getLocusId()));
     }
 

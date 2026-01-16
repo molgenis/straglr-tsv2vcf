@@ -58,7 +58,8 @@ class AppCommandLineRunner implements CommandLineRunner {
       if(commandLine.hasOption(AppCommandLineOptions.OPT_HAPLOID)) {
        haploidContigs = Arrays.asList(commandLine.getOptionValue(AppCommandLineOptions.OPT_HAPLOID).split(","));
       }
-      StraglrTsv2Vcf.run(inputPath, inputBed, inputReference, haploidContigs, getOutput(commandLine));
+      String sampleName = commandLine.getOptionValue(AppCommandLineOptions.OPT_SAMPLE);
+      StraglrTsv2Vcf.run(inputPath, inputBed, inputReference, haploidContigs, getOutput(commandLine), sampleName);
 
     } catch (Exception e) {
       LOGGER.error(e.getLocalizedMessage(), e);

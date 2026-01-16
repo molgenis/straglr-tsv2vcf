@@ -5,7 +5,11 @@ import static org.molgenis.vcf.straglr.utils.RepeatUnitUtils.getRepeatUnitsWithC
 
 import htsjdk.samtools.SAMSequenceRecord;
 import htsjdk.samtools.reference.IndexedFastaSequenceFile;
-import htsjdk.variant.variantcontext.*;
+import htsjdk.variant.variantcontext.Allele;
+import htsjdk.variant.variantcontext.GenotypeBuilder;
+import htsjdk.variant.variantcontext.GenotypesContext;
+import htsjdk.variant.variantcontext.VariantContext;
+import htsjdk.variant.variantcontext.VariantContextBuilder;
 import htsjdk.variant.vcf.VCFAltHeaderLine;
 import htsjdk.variant.vcf.VCFContigHeaderLine;
 import htsjdk.variant.vcf.VCFFilterHeaderLine;
@@ -16,7 +20,13 @@ import htsjdk.variant.vcf.VCFHeaderLineCount;
 import htsjdk.variant.vcf.VCFHeaderLineType;
 import htsjdk.variant.vcf.VCFHeaderVersion;
 import htsjdk.variant.vcf.VCFInfoHeaderLine;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import org.molgenis.vcf.straglr.model.Locus;
 import org.molgenis.vcf.straglr.model.Read;
@@ -25,14 +35,9 @@ import org.molgenis.vcf.straglr.model.VariantKey;
 
 public class VcfUtils {
 
-  private static final String SAMPLE_NAME = "SAMPLE";
-
-  public VariantContext createStrVcfLine(
-      VariantKey variantKey,
-      List<Read> inputReads,
-      List<String> haploidContigs,
-      IndexedFastaSequenceFile fasta,
-      Map<VariantKey, Locus> locusIdLookup) {
+  public static VariantContext createStrVcfLine(VariantKey variantKey, List<Read> inputReads,
+      List<String> haploidContigs, IndexedFastaSequenceFile fasta,
+      Map<VariantKey, Locus> locusIdLookup, String sampleName) {
 
     List<Read> reads = inputReads.stream()
         .filter(r -> r.readStatus() != ReadStatus.SKIPPED_NOT_SPANNING)
@@ -53,14 +58,15 @@ public class VcfUtils {
         determineGenotypeAlleles(alleleCounts.keySet(), variantKey.contig(), haploidContigs);
 
     GenotypesContext genotypes = GenotypesContext.create(
-        new GenotypeBuilder(SAMPLE_NAME)
+        new GenotypeBuilder(sampleName)
             .alleles(genotypeAlleles)
             .DP(dp)
             .AD(ad)
             .make()
     );
 
-    Map<String, Object> attributes = buildAttributes(variantKey, reads, locusIdLookup.get(variantKey));
+    Map<String, Object> attributes = buildAttributes(variantKey, reads,
+        locusIdLookup.get(variantKey));
 
     List<Allele> allAlleles = new ArrayList<>();
     allAlleles.add(refAllele);
@@ -79,14 +85,14 @@ public class VcfUtils {
         .make();
   }
 
-  private Allele createRefAllele(VariantKey variantKey, IndexedFastaSequenceFile fasta) {
+  private static Allele createRefAllele(VariantKey variantKey, IndexedFastaSequenceFile fasta) {
     String base = fasta
         .getSubsequenceAt(variantKey.contig(), variantKey.start(), variantKey.start())
         .getBaseString();
     return Allele.create(base, true);
   }
 
-  private Map<Allele, Integer> countAltAlleles(List<Read> reads) {
+  private static Map<Allele, Integer> countAltAlleles(List<Read> reads) {
     return reads.stream()
         .collect(Collectors.groupingBy(
             read -> Allele.create("<STR" + parseAlleleInt(read.allele()) + ">"),
@@ -94,7 +100,7 @@ public class VcfUtils {
         ));
   }
 
-  private List<String> collectFilters(List<Read> reads) {
+  private static List<String> collectFilters(List<Read> reads) {
     return reads.stream()
         .map(Read::readStatus)
         .filter(status -> status != ReadStatus.FULL)
@@ -103,7 +109,7 @@ public class VcfUtils {
         .toList();
   }
 
-  private List<Allele> determineGenotypeAlleles(
+  private static List<Allele> determineGenotypeAlleles(
       Set<Allele> alleles,
       String contig,
       List<String> haploidContigs) {
@@ -118,7 +124,7 @@ public class VcfUtils {
     return genotypeAlleles;
   }
 
-  private Map<String, Object> buildAttributes(
+  private static Map<String, Object> buildAttributes(
       VariantKey variantKey,
       List<Read> reads,
       Locus locus) {
@@ -139,7 +145,7 @@ public class VcfUtils {
     return attributes;
   }
 
-  private int parseAlleleInt(String alleleStr) {
+  static int parseAlleleInt(String alleleStr) {
     return Math.round(Float.parseFloat(alleleStr.trim()));
   }
 
@@ -151,9 +157,8 @@ public class VcfUtils {
         .thenComparingInt(VariantContext::getEnd);
   }
 
-  public static VCFHeader createStrVcfHeader(
-      List<VariantContext> variants,
-      IndexedFastaSequenceFile fastaReader) {
+  public static VCFHeader createStrVcfHeader(List<VariantContext> variants,
+      IndexedFastaSequenceFile fastaReader, String sampleName) {
 
     Set<VCFHeaderLine> headerLines = new HashSet<>();
 
@@ -165,31 +170,34 @@ public class VcfUtils {
     VCFHeader header = new VCFHeader(
         VCFHeaderVersion.VCF4_2,
         headerLines,
-        Set.of(SAMPLE_NAME)
+        Set.of(sampleName)
     );
 
     addContigHeaders(header, fastaReader);
     return header;
   }
 
-  private static void addAltHeaders(Set<VCFHeaderLine> headerLines, List<VariantContext> variants) {
+  static void addAltHeaders(Set<VCFHeaderLine> headerLines, List<VariantContext> variants) {
     variants.stream()
         .flatMap(vc -> vc.getAlternateAlleles().stream())
-        .map(Allele::getBaseString)
+        .map(Allele::getDisplayString)
         .filter(alt -> alt.startsWith("<STR"))
         .collect(Collectors.toSet())
         .forEach(alt -> {
           int repeatLen = Integer.parseInt(alt.substring(4, alt.length() - 1));
           headerLines.add(
               new VCFAltHeaderLine(
-                  "Repeat length " + repeatLen,
+                  String.format(
+                      "##ALT=<ID=STR%s,Description=\"Short tandem repeat (STR) allele\" of length %d.>",
+                      repeatLen, repeatLen),
                   VCFHeaderVersion.VCF4_2
               )
           );
         });
   }
 
-  private static void addFilterHeaders(Set<VCFHeaderLine> headerLines, List<VariantContext> variants) {
+  private static void addFilterHeaders(Set<VCFHeaderLine> headerLines,
+      List<VariantContext> variants) {
     variants.stream()
         .flatMap(vc -> vc.getFilters().stream())
         .distinct()
@@ -198,8 +206,10 @@ public class VcfUtils {
 
   private static void addInfoHeaders(Set<VCFHeaderLine> headerLines) {
     headerLines.add(new VCFInfoHeaderLine("END", 1, VCFHeaderLineType.Integer, "End position"));
-    headerLines.add(new VCFInfoHeaderLine("RU_CALL", 1, VCFHeaderLineType.String, "Most frequent actual repeat motif"));
-    headerLines.add(new VCFInfoHeaderLine("RU_CAT", 1, VCFHeaderLineType.String, "Catalog repeat motif"));
+    headerLines.add(new VCFInfoHeaderLine("RU_CALL", 1, VCFHeaderLineType.String,
+        "Most frequent actual repeat motif"));
+    headerLines.add(
+        new VCFInfoHeaderLine("RU_CAT", 1, VCFHeaderLineType.String, "Catalog repeat motif"));
     headerLines.add(new VCFInfoHeaderLine(
         "REPID", 1, VCFHeaderLineType.String,
         "Locus identifier."

@@ -9,11 +9,19 @@ import htsjdk.samtools.reference.IndexedFastaSequenceFile;
 import htsjdk.variant.variantcontext.VariantContext;
 import htsjdk.variant.variantcontext.writer.VariantContextWriter;
 import htsjdk.variant.variantcontext.writer.VariantContextWriterBuilder;
-import htsjdk.variant.vcf.*;
-import java.io.*;
+import htsjdk.variant.vcf.VCFHeader;
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.Path;
-import java.util.*;
-import org.molgenis.vcf.straglr.model.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import org.molgenis.vcf.straglr.model.Locus;
+import org.molgenis.vcf.straglr.model.Read;
+import org.molgenis.vcf.straglr.model.ReadStatus;
+import org.molgenis.vcf.straglr.model.StraglrLine;
+import org.molgenis.vcf.straglr.model.VariantKey;
 import org.molgenis.vcf.straglr.utils.VcfUtils;
 
 public final class StraglrTsv2Vcf {
@@ -22,12 +30,8 @@ public final class StraglrTsv2Vcf {
     // utility class
   }
 
-  public static void run(
-      Path inputTsv,
-      Path inputBed,
-      Path inputReference,
-      List<String> haploidContigs,
-      Path outputVcf) {
+  public static void run(Path inputTsv, Path inputBed, Path inputReference,
+      List<String> haploidContigs, Path outputVcf, String sampleName) {
 
     List<StraglrLine> straglrLines = readTsv(inputTsv);
     Map<VariantKey, List<Read>> readsPerLocus = parseLoci(straglrLines);
@@ -36,20 +40,14 @@ public final class StraglrTsv2Vcf {
     try (IndexedFastaSequenceFile fasta =
         new IndexedFastaSequenceFile(inputReference.toFile())) {
 
-      VcfUtils vcfUtils = new VcfUtils();
-
       List<VariantContext> variants = readsPerLocus.entrySet().stream()
           .map(entry ->
-              vcfUtils.createStrVcfLine(
-                  entry.getKey(),
-                  entry.getValue(),
-                  haploidContigs,
-                  fasta,
-                  locusLookup))
+              VcfUtils.createStrVcfLine(entry.getKey(), entry.getValue(), haploidContigs, fasta,
+                  locusLookup, sampleName))
           .sorted(variantComparator())
           .toList();
 
-      VCFHeader header = createStrVcfHeader(variants, fasta);
+      VCFHeader header = createStrVcfHeader(variants, fasta, sampleName);
 
       try (VariantContextWriter writer =
           new VariantContextWriterBuilder()
@@ -64,6 +62,7 @@ public final class StraglrTsv2Vcf {
       throw new UncheckedIOException(e);
     }
   }
+
   private static Map<VariantKey, List<Read>> parseLoci(List<StraglrLine> lines) {
     Map<VariantKey, List<Read>> loci = new HashMap<>();
 

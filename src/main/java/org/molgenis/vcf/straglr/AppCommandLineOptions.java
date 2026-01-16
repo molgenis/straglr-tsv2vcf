@@ -18,6 +18,8 @@ class AppCommandLineOptions {
   static final String OPT_REFERENCE_LONG = "reference";
   static final String OPT_HAPLOID = "h";
   static final String OPT_HAPLOID_LONG = "haploid_contigs";
+  static final String OPT_SAMPLE = "s";
+  static final String OPT_SAMPLE_LONG = "sample";
   static final String OPT_OUTPUT = "o";
   static final String OPT_OUTPUT_LONG = "output";
   static final String OPT_FORCE = "f";
@@ -34,24 +36,34 @@ class AppCommandLineOptions {
             .hasArg(true)
             .longOpt(OPT_INPUT_LONG)
             .desc("Straglr tsv file.")
+            .required()
             .build());
     appOptions.addOption(
         Option.builder(OPT_BED)
             .hasArg(true)
             .longOpt(OPT_BED_LONG)
             .desc("bed catalog file (.bed).")
+            .required()
             .build());
     appOptions.addOption(
         Option.builder(OPT_REFERENCE)
             .hasArg(true)
             .longOpt(OPT_REFERENCE_LONG)
             .desc("Reference sequence file (.fna).")
+            .required()
             .build());
     appOptions.addOption(
         Option.builder(OPT_HAPLOID)
             .hasArg(true)
             .longOpt(OPT_HAPLOID_LONG)
             .desc("Comma separated list of haploid contigs.")
+            .build());
+    appOptions.addOption(
+        Option.builder(OPT_SAMPLE)
+            .hasArg(true)
+            .longOpt(OPT_SAMPLE_LONG)
+            .desc("Sample name to be used in the VCF.")
+            .required()
             .build());
     appOptions.addOption(
         Option.builder(OPT_OUTPUT)
@@ -93,7 +105,7 @@ class AppCommandLineOptions {
 
   private static void validateInput(CommandLine commandLine) {
     validateFile(commandLine, OPT_INPUT, ".tsv");
-    validateFile(commandLine, OPT_REFERENCE, ".fna");//FIXME
+    validateFile(commandLine, OPT_REFERENCE, ".fna");
     validateFile(commandLine, OPT_BED, ".bed");
   }
 
