@@ -2,7 +2,6 @@ package org.molgenis.vcf.straglr.utils;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import com.opencsv.exceptions.CsvException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -65,11 +64,11 @@ class FileUtilsTest {
     assertTrue(lookup.containsKey(key1));
     assertTrue(lookup.containsKey(key2));
 
-    Locus locus1 = lookup.get(key1);
-    assertEquals("chrX", locus1.chrom());
-    assertEquals(67545317, locus1.start());
-    assertEquals(67545386, locus1.stop());
-    assertEquals("GCA", locus1.catalogRepeatUnit());
-    assertEquals("AR", locus1.identifier());
+    Locus locus = lookup.get(key1);
+    assertEquals("chrX", locus.chrom());
+    assertEquals(67545317, locus.start());
+    assertEquals(67545386, locus.stop());
+    assertEquals("GCA", locus.catalogRepeatUnit());
+    assertEquals("AR", locus.identifier());
   }
 }

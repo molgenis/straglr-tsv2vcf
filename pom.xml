@@ -157,12 +157,14 @@
               <artifactId>lombok</artifactId>
             </exclude>
           </excludes>
+            <mainClass>org.molgenis.vcf.straglr.App</mainClass>
         </configuration>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-failsafe-plugin</artifactId>
       </plugin>
+
     </plugins>
   </build>
 
