@@ -3,13 +3,17 @@ package org.molgenis.vcf.straglr.utils;
 import static org.molgenis.vcf.straglr.utils.RepeatUnitUtils.getMostFrequentActualRepeat;
 import static org.molgenis.vcf.straglr.utils.RepeatUnitUtils.getRepeatUnitsWithCounts;
 
+import htsjdk.samtools.SAMSequenceDictionary;
 import htsjdk.samtools.SAMSequenceRecord;
-import htsjdk.samtools.reference.IndexedFastaSequenceFile;
+import htsjdk.samtools.reference.ReferenceSequence;
+import htsjdk.samtools.reference.ReferenceSequenceFile;
 import htsjdk.variant.variantcontext.Allele;
 import htsjdk.variant.variantcontext.GenotypeBuilder;
 import htsjdk.variant.variantcontext.GenotypesContext;
 import htsjdk.variant.variantcontext.VariantContext;
 import htsjdk.variant.variantcontext.VariantContextBuilder;
+import htsjdk.variant.variantcontext.writer.VariantContextWriter;
+import htsjdk.variant.variantcontext.writer.VariantContextWriterBuilder;
 import htsjdk.variant.vcf.VCFAltHeaderLine;
 import htsjdk.variant.vcf.VCFContigHeaderLine;
 import htsjdk.variant.vcf.VCFFilterHeaderLine;
@@ -20,6 +24,7 @@ import htsjdk.variant.vcf.VCFHeaderLineCount;
 import htsjdk.variant.vcf.VCFHeaderLineType;
 import htsjdk.variant.vcf.VCFHeaderVersion;
 import htsjdk.variant.vcf.VCFInfoHeaderLine;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -36,7 +41,7 @@ import org.molgenis.vcf.straglr.model.VariantKey;
 public class VcfUtils {
 
   public static VariantContext createStrVcfLine(VariantKey variantKey, List<Read> inputReads,
-      List<String> haploidContigs, IndexedFastaSequenceFile fasta,
+      List<String> haploidContigs, ReferenceSequenceFile fasta,
       Map<VariantKey, Locus> locusIdLookup, String sampleName) {
 
     List<Read> reads = inputReads.stream()
@@ -85,7 +90,7 @@ public class VcfUtils {
         .make();
   }
 
-  private static Allele createRefAllele(VariantKey variantKey, IndexedFastaSequenceFile fasta) {
+  private static Allele createRefAllele(VariantKey variantKey, ReferenceSequenceFile fasta) {
     String base = fasta
         .getSubsequenceAt(variantKey.contig(), variantKey.start(), variantKey.start())
         .getBaseString();
@@ -158,7 +163,7 @@ public class VcfUtils {
   }
 
   public static VCFHeader createStrVcfHeader(List<VariantContext> variants,
-      IndexedFastaSequenceFile fastaReader, String sampleName) {
+      SAMSequenceDictionary dict, String sampleName) {
 
     Set<VCFHeaderLine> headerLines = new HashSet<>();
 
@@ -173,7 +178,7 @@ public class VcfUtils {
         Set.of(sampleName)
     );
 
-    addContigHeaders(header, fastaReader);
+    addContigHeaders(header, dict);
     return header;
   }
 
@@ -231,9 +236,7 @@ public class VcfUtils {
         "AD", VCFHeaderLineCount.UNBOUNDED, VCFHeaderLineType.Integer, "Allelic depths"));
   }
 
-  private static void addContigHeaders(VCFHeader header, IndexedFastaSequenceFile fastaReader) {
-    var dict = fastaReader.getSequenceDictionary();
-
+  private static void addContigHeaders(VCFHeader header, SAMSequenceDictionary dict) {
     for (SAMSequenceRecord seq : dict.getSequences()) {
       Map<String, String> contigInfo = Map.of(
           "ID", seq.getSequenceName(),
@@ -243,5 +246,29 @@ public class VcfUtils {
           new VCFContigHeaderLine(contigInfo, dict.getSequenceIndex(seq.getSequenceName()))
       );
     }
+  }
+
+  public static VariantContextWriter createVcfWriter(Path outputVcf, String sampleName, ReferenceSequenceFile fasta,
+      List<VariantContext> variants) {
+    SAMSequenceDictionary dict = new SAMSequenceDictionary();
+
+    ReferenceSequence seq;
+    while ((seq = fasta.nextSequence()) != null) {
+      String name = seq.getName();
+      int length = seq.length();
+      dict.addSequence(new SAMSequenceRecord(name, length));
+    }
+
+    VCFHeader header = createStrVcfHeader(variants, dict, sampleName);
+
+    VariantContextWriter writer =
+        new VariantContextWriterBuilder()
+            .setOutputFile(outputVcf.toFile())
+            .setReferenceDictionary(dict)
+            .build();
+
+    writer.writeHeader(header);
+
+    return writer;
   }
 }

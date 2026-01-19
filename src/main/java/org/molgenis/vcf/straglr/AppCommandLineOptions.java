@@ -4,6 +4,7 @@ import static java.lang.String.format;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Set;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
@@ -104,12 +105,12 @@ class AppCommandLineOptions {
   }
 
   private static void validateInput(CommandLine commandLine) {
-    validateFile(commandLine, OPT_INPUT, ".tsv");
-    validateFile(commandLine, OPT_REFERENCE, ".fna");
-    validateFile(commandLine, OPT_BED, ".bed");
+    validateFile(commandLine, OPT_INPUT, Set.of(".tsv"));
+    validateFile(commandLine, OPT_REFERENCE, Set.of( ".fna.gz", "fasta.gz"));
+    validateFile(commandLine, OPT_BED, Set.of( ".bed"));
   }
 
-  private static void validateFile(CommandLine commandLine, String option, String extension) {
+  private static void validateFile(CommandLine commandLine, String option, Set<String> extensions) {
     if (commandLine.hasOption(option)) {
       Path inputPath = Path.of(commandLine.getOptionValue(option));
       if (!Files.exists(inputPath)) {
@@ -125,9 +126,11 @@ class AppCommandLineOptions {
             format("Input file '%s' is not readable.", inputPath));
       }
       String inputPathStr = inputPath.toString();
-      if (!inputPathStr.endsWith(extension)) {
+      boolean isCorrectExtension = extensions.stream().anyMatch(inputPathStr::endsWith);
+      if (!isCorrectExtension) {
         throw new IllegalArgumentException(
-            format("Input file '%s' is not a %s file.", inputPathStr, extension));
+            String.format("Input file '%s' is not one of: %s",
+                inputPathStr, String.join(", ", extensions)));
       }
     }
   }

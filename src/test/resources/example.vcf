@@ -1,0 +1,19 @@
+##fileformat=VCFv4.2
+##ALT=<ID=STR17,Description="Short tandem repeat (STR) allele of length 17.">
+##ALT=<ID=STR20,Description="Short tandem repeat (STR) allele of length 20.">
+##ALT=<ID=STR9,Description="Short tandem repeat (STR) allele of length 9.">
+##FILTER=<ID=PASS,Description="PASS">
+##FORMAT=<ID=AD,Number=.,Type=Integer,Description="Allelic depths">
+##FORMAT=<ID=DP,Number=1,Type=Integer,Description="Read depth">
+##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
+##INFO=<ID=END,Number=1,Type=Integer,Description="End position">
+##INFO=<ID=REPID,Number=1,Type=String,Description="Locus identifier.">
+##INFO=<ID=RU_CALL,Number=1,Type=String,Description="Most frequent actual repeat motif">
+##INFO=<ID=RU_CAT,Number=1,Type=String,Description="Catalog repeat motif">
+##INFO=<ID=RU_MATCH,Number=0,Type=Flag,Description="RU call matches catalog (allowing shift/IUPAC)">
+##INFO=<ID=RU_SEEN,Number=.,Type=String,Description="All RUs encountered with read counts">
+##contig=<ID=1,length=101>
+##contig=<ID=2,length=101>
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	SAMPLE
+1	2	.	T	<STR9>,<STR20>	.	PASS	END=11;REPID=AR;RU_CALL=GGC;RU_CAT=GCA;RU_SEEN=GGC(4)	GT:AD:DP	1/2:2,2:4
+2	2	.	T	<STR17>	.	PASS	END=12;REPID=ATN1;RU_CALL=CAG;RU_CAT=CNG;RU_MATCH;RU_SEEN=CAG(2)	GT:AD:DP	1/1:2:2

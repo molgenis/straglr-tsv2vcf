@@ -117,12 +117,10 @@ class VcfUtilsTest {
 
   @Test
   void testCreateStrVcfHeader_ContigHeaders() {
-    IndexedFastaSequenceFile fasta = mock(IndexedFastaSequenceFile.class);
     SAMSequenceRecord seq1 = new SAMSequenceRecord("chr1", 1000);
     SAMSequenceDictionary dict = new SAMSequenceDictionary(List.of(seq1));
-    when(fasta.getSequenceDictionary()).thenReturn(dict);
 
-    VCFHeader header = VcfUtils.createStrVcfHeader(List.of(), fasta, "SAMPLE");
+    VCFHeader header = VcfUtils.createStrVcfHeader(List.of(), dict, "SAMPLE");
     assertEquals(1, header.getContigLines().size());
     assertEquals("chr1", header.getContigLines().get(0).getID());
   }

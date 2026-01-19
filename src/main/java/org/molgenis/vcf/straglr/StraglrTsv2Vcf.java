@@ -2,14 +2,13 @@ package org.molgenis.vcf.straglr;
 
 import static org.molgenis.vcf.straglr.utils.FileUtils.readBed;
 import static org.molgenis.vcf.straglr.utils.FileUtils.readTsv;
-import static org.molgenis.vcf.straglr.utils.VcfUtils.createStrVcfHeader;
+import static org.molgenis.vcf.straglr.utils.VcfUtils.createVcfWriter;
 import static org.molgenis.vcf.straglr.utils.VcfUtils.variantComparator;
 
-import htsjdk.samtools.reference.IndexedFastaSequenceFile;
+import htsjdk.samtools.reference.BlockCompressedIndexedFastaSequenceFile;
+import htsjdk.samtools.reference.ReferenceSequenceFile;
 import htsjdk.variant.variantcontext.VariantContext;
 import htsjdk.variant.variantcontext.writer.VariantContextWriter;
-import htsjdk.variant.variantcontext.writer.VariantContextWriterBuilder;
-import htsjdk.variant.vcf.VCFHeader;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Path;
@@ -37,8 +36,8 @@ public final class StraglrTsv2Vcf {
     Map<VariantKey, List<Read>> readsPerLocus = parseLoci(straglrLines);
     Map<VariantKey, Locus> locusLookup = readBed(inputBed);
 
-    try (IndexedFastaSequenceFile fasta =
-        new IndexedFastaSequenceFile(inputReference.toFile())) {
+    try (ReferenceSequenceFile fasta =
+        new BlockCompressedIndexedFastaSequenceFile(inputReference)) {
 
       List<VariantContext> variants = readsPerLocus.entrySet().stream()
           .map(entry ->
@@ -47,17 +46,9 @@ public final class StraglrTsv2Vcf {
           .sorted(variantComparator())
           .toList();
 
-      VCFHeader header = createStrVcfHeader(variants, fasta, sampleName);
-
-      try (VariantContextWriter writer =
-          new VariantContextWriterBuilder()
-              .setOutputFile(outputVcf.toFile())
-              .build()) {
-
-        writer.writeHeader(header);
+      try(VariantContextWriter writer = createVcfWriter(outputVcf, sampleName, fasta, variants)) {
         variants.forEach(writer::add);
       }
-
     } catch (IOException e) {
       throw new UncheckedIOException(e);
     }
