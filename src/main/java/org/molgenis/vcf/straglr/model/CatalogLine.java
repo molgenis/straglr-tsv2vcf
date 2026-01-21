@@ -10,7 +10,16 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class BedLine {
+/**
+ * @param chrom contig identifier
+ * @param start 0 based start position
+ * @param stop 0-based stop position
+ * @param straglrRu the repeat unit provided to straglr
+ * @param gene the gene of the locus
+ * @param locusId the identifier of the locus
+ * @param repeatUnit the repeat unit to match with if "-" was provided to straglr
+ */
+public class CatalogLine {
   @CsvBindByPosition(
       position = 0,
       required = true)

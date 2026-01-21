@@ -12,8 +12,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.molgenis.vcf.straglr.model.Locus;
-import org.molgenis.vcf.straglr.model.StraglrLine;
-import org.molgenis.vcf.straglr.model.VariantKey;
+import org.molgenis.vcf.straglr.model.StraglrTsvLine;
+import org.molgenis.vcf.straglr.model.LocusKey;
 
 @ExtendWith(MockitoExtension.class)
 class FileUtilsTest {
@@ -32,10 +32,10 @@ class FileUtilsTest {
     Path file = tempDir.resolve("input.tsv");
     Files.writeString(file, tsv);
 
-    List<StraglrLine> result = FileUtils.readTsv(file);
+    List<StraglrTsvLine> result = FileUtils.readTsv(file);
 
     assertEquals(1, result.size());
-    StraglrLine line = result.getFirst();
+    StraglrTsvLine line = result.getFirst();
     assertEquals("chr1", line.getChrom());
     assertEquals(149390802, line.getStart());
     assertEquals(149390841, line.getEnd());
@@ -55,12 +55,12 @@ class FileUtilsTest {
     Path file = tempDir.resolve("regions.bed");
     Files.writeString(file, bed);
 
-    Map<VariantKey, Locus> lookup = FileUtils.readBed(file);
+    Map<LocusKey, Locus> lookup = FileUtils.readBed(file);
 
     assertEquals(2, lookup.size());
 
-    VariantKey key1 = new VariantKey("chrX", 67545317, 67545386);
-    VariantKey key2 = new VariantKey("chr12", 6936717, 6936774);
+    LocusKey key1 = new LocusKey("chrX", 67545317, 67545386);
+    LocusKey key2 = new LocusKey("chr12", 6936717, 6936774);
 
     assertTrue(lookup.containsKey(key1));
     assertTrue(lookup.containsKey(key2));

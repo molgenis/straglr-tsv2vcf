@@ -13,7 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.molgenis.vcf.straglr.model.Locus;
 import org.molgenis.vcf.straglr.model.Read;
 import org.molgenis.vcf.straglr.model.ReadStatus;
-import org.molgenis.vcf.straglr.model.VariantKey;
+import org.molgenis.vcf.straglr.model.LocusKey;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -26,9 +26,9 @@ class VcfUtilsTest {
   void testCreateStrVcfLine_SkippedReads_ReturnsNull() {
     IndexedFastaSequenceFile fasta = mock(IndexedFastaSequenceFile.class);
     Locus locus = mock(Locus.class);
-    VariantKey key = new VariantKey("chr1", 100, 103);
+    LocusKey key = new LocusKey("chr1", 100, 103);
     Read skipped = mock(Read.class);
-    when(skipped.readStatus()).thenReturn(ReadStatus.SKIPPED_NOT_SPANNING);
+    when(skipped.readStatus()).thenReturn(ReadStatus.SKIPPED);
     List<Read> reads = List.of(skipped);
     VariantContext result = VcfUtils.createStrVcfLine(key, reads, List.of(), fasta, Map.of(key, locus), "SAMPLE");
     assertNull(result);
@@ -40,7 +40,7 @@ class VcfUtilsTest {
     Locus locus = mock(Locus.class);
     when(locus.catalogRepeatUnit()).thenReturn("AT");
     when(locus.identifier()).thenReturn("STR1");
-    VariantKey key = new VariantKey("chr1", 100, 103);
+    LocusKey key = new LocusKey("chr1", 100, 103);
     ReferenceSequence refSeq = mock(ReferenceSequence.class);
     when(refSeq.getBaseString()).thenReturn("A");
     when(fasta.getSubsequenceAt(eq("chr1"), eq(100L), eq(100L))).thenReturn(refSeq);
@@ -66,7 +66,7 @@ class VcfUtilsTest {
     Locus locus = mock(Locus.class);
     when(locus.catalogRepeatUnit()).thenReturn("AT");
     when(locus.identifier()).thenReturn("STR1");
-    VariantKey key = new VariantKey("chr1", 100, 103);
+    LocusKey key = new LocusKey("chr1", 100, 103);
 
     ReferenceSequence refSeq = mock(ReferenceSequence.class);
     when(refSeq.getBaseString()).thenReturn("A");
@@ -89,14 +89,14 @@ class VcfUtilsTest {
     Locus locus = mock(Locus.class);
     when(locus.catalogRepeatUnit()).thenReturn("AT");
     when(locus.identifier()).thenReturn("STR1");
-    VariantKey key = new VariantKey("chr1", 100, 103);
+    LocusKey key = new LocusKey("chr1", 100, 103);
     Read full = mock(Read.class);
     when(full.allele()).thenReturn("10.0");
     when(full.readStatus()).thenReturn(ReadStatus.FULL);
     when(full.actualRepeat()).thenReturn("AT");
     Read partial = mock(Read.class);
     when(partial.allele()).thenReturn("12.0");
-    when(partial.readStatus()).thenReturn(ReadStatus.FAILED_MOTIF_SIZE_OUT_OF_RANGE);
+    when(partial.readStatus()).thenReturn(ReadStatus.FAILED);
     when(partial.actualRepeat()).thenReturn("AT");
     List<Read> reads = List.of(full, partial);
 
@@ -105,7 +105,7 @@ class VcfUtilsTest {
     when(fasta.getSubsequenceAt(anyString(), anyLong(), anyLong())).thenReturn(refSeq);
 
     VariantContext vc = VcfUtils.createStrVcfLine(key, reads, List.of(), fasta, Map.of(key, locus), "SAMPLE");
-    assertEquals("FAILED_MOTIF_SIZE_OUT_OF_RANGE", vc.getFilters().stream().findFirst().get());
+    assertEquals("FAILED", vc.getFilters().stream().findFirst().get());
   }
 
   @Test

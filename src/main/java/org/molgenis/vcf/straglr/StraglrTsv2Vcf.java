@@ -19,8 +19,8 @@ import java.util.Map;
 import org.molgenis.vcf.straglr.model.Locus;
 import org.molgenis.vcf.straglr.model.Read;
 import org.molgenis.vcf.straglr.model.ReadStatus;
-import org.molgenis.vcf.straglr.model.StraglrLine;
-import org.molgenis.vcf.straglr.model.VariantKey;
+import org.molgenis.vcf.straglr.model.StraglrTsvLine;
+import org.molgenis.vcf.straglr.model.LocusKey;
 import org.molgenis.vcf.straglr.utils.VcfUtils;
 
 public final class StraglrTsv2Vcf {
@@ -32,9 +32,9 @@ public final class StraglrTsv2Vcf {
   public static void run(Path inputTsv, Path inputBed, Path inputReference,
       List<String> haploidContigs, Path outputVcf, String sampleName) {
 
-    List<StraglrLine> straglrLines = readTsv(inputTsv);
-    Map<VariantKey, List<Read>> readsPerLocus = parseLoci(straglrLines);
-    Map<VariantKey, Locus> locusLookup = readBed(inputBed);
+    List<StraglrTsvLine> straglrTsvLines = readTsv(inputTsv);
+    Map<LocusKey, List<Read>> readsPerLocus = parseLoci(straglrTsvLines);
+    Map<LocusKey, Locus> locusLookup = readBed(inputBed);
 
     try (ReferenceSequenceFile fasta =
         new BlockCompressedIndexedFastaSequenceFile(inputReference)) {
@@ -54,11 +54,11 @@ public final class StraglrTsv2Vcf {
     }
   }
 
-  private static Map<VariantKey, List<Read>> parseLoci(List<StraglrLine> lines) {
-    Map<VariantKey, List<Read>> loci = new HashMap<>();
+  private static Map<LocusKey, List<Read>> parseLoci(List<StraglrTsvLine> lines) {
+    Map<LocusKey, List<Read>> loci = new HashMap<>();
 
-    for (StraglrLine line : lines) {
-      VariantKey locus = new VariantKey(
+    for (StraglrTsvLine line : lines) {
+      LocusKey locus = new LocusKey(
           line.getChrom(),
           line.getStart() + 1,
           line.getEnd() + 1

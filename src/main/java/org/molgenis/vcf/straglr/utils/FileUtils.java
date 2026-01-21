@@ -13,26 +13,26 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.molgenis.vcf.straglr.model.BedLine;
+import org.molgenis.vcf.straglr.model.CatalogLine;
 import org.molgenis.vcf.straglr.model.Locus;
-import org.molgenis.vcf.straglr.model.StraglrLine;
-import org.molgenis.vcf.straglr.model.VariantKey;
+import org.molgenis.vcf.straglr.model.StraglrTsvLine;
+import org.molgenis.vcf.straglr.model.LocusKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class FileUtils {
   private static final Logger LOGGER = LoggerFactory.getLogger(FileUtils.class);
-  public static List<StraglrLine> readTsv(Path input) {
-    return readDelimitedFile(input, StraglrLine.class, 1);
+  public static List<StraglrTsvLine> readTsv(Path input) {
+    return readDelimitedFile(input, StraglrTsvLine.class, 1);
   }
 
-  public static Map<VariantKey, Locus> readBed(Path input) {
-    List<BedLine> bedLines = readDelimitedFile(input, BedLine.class, 0);
-    Map<VariantKey, Locus> lookup = new HashMap<>();
+  public static Map<LocusKey, Locus> readBed(Path input) {
+    List<CatalogLine> bedLines = readDelimitedFile(input, CatalogLine.class, 0);
+    Map<LocusKey, Locus> lookup = new HashMap<>();
 
-    for (BedLine line : bedLines) {
+    for (CatalogLine line : bedLines) {
       // BED is 0-based, VCF is 1-based
-      VariantKey key = new VariantKey(
+      LocusKey key = new LocusKey(
           line.getChrom(),
           line.getStart() + 1,
           line.getStop() + 1

@@ -2,17 +2,25 @@ package org.molgenis.vcf.straglr.model;
 
 public enum ReadStatus {
   FULL,
-  SKIPPED_NOT_SPANNING,
-  FAILED_MOTIF_SIZE_OUT_OF_RANGE,
-  FAILED_UNMATCHED_MOTIF;
+  PARTIAL,
+  SKIPPED,
+  FAILED;
 
   public static ReadStatus fromTsv(String tsvValue) {
-    String clean = tsvValue.trim()
-        .replace(" ", "_")
-        .replace("(", "")
-        .replace(")", "")
-        .toUpperCase();
+    if (tsvValue == null || tsvValue.trim().isEmpty()) {
+      return ReadStatus.SKIPPED;
+    }
 
-    return valueOf(clean);
+    String clean = tsvValue.trim().toUpperCase();
+    if (clean.startsWith("FULL") || clean.startsWith("COMPLETE")) {
+      return ReadStatus.FULL;
+    }
+    if (clean.startsWith("PARTIAL") || clean.startsWith("INCOMPLETE")) {
+      return ReadStatus.PARTIAL;
+    }
+    if (clean.startsWith("SKIP") || clean.startsWith("IGNOR")) {
+      return ReadStatus.SKIPPED;
+    }
+    return ReadStatus.FAILED;
   }
 }

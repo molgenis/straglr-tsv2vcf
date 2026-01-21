@@ -36,16 +36,16 @@ import java.util.stream.Collectors;
 import org.molgenis.vcf.straglr.model.Locus;
 import org.molgenis.vcf.straglr.model.Read;
 import org.molgenis.vcf.straglr.model.ReadStatus;
-import org.molgenis.vcf.straglr.model.VariantKey;
+import org.molgenis.vcf.straglr.model.LocusKey;
 
 public class VcfUtils {
 
-  public static VariantContext createStrVcfLine(VariantKey variantKey, List<Read> inputReads,
+  public static VariantContext createStrVcfLine(LocusKey locusKey, List<Read> inputReads,
       List<String> haploidContigs, ReferenceSequenceFile fasta,
-      Map<VariantKey, Locus> locusIdLookup, String sampleName) {
+      Map<LocusKey, Locus> locusIdLookup, String sampleName) {
 
     List<Read> reads = inputReads.stream()
-        .filter(r -> r.readStatus() != ReadStatus.SKIPPED_NOT_SPANNING)
+        .filter(r -> r.readStatus() != ReadStatus.SKIPPED)
         .toList();
 
     if (reads.isEmpty()) {
@@ -54,13 +54,13 @@ public class VcfUtils {
 
     int dp = reads.size();
     List<String> filters = collectFilters(reads);
-    Allele refAllele = createRefAllele(variantKey, fasta);
+    Allele refAllele = createRefAllele(locusKey, fasta);
 
     Map<Allele, Integer> alleleCounts = countAltAlleles(reads);
     int[] ad = alleleCounts.values().stream().mapToInt(Integer::intValue).toArray();
 
     List<Allele> genotypeAlleles =
-        determineGenotypeAlleles(alleleCounts.keySet(), variantKey.contig(), haploidContigs);
+        determineGenotypeAlleles(alleleCounts.keySet(), locusKey.contig(), haploidContigs);
 
     GenotypesContext genotypes = GenotypesContext.create(
         new GenotypeBuilder(sampleName)
@@ -70,8 +70,8 @@ public class VcfUtils {
             .make()
     );
 
-    Map<String, Object> attributes = buildAttributes(variantKey, reads,
-        locusIdLookup.get(variantKey));
+    Map<String, Object> attributes = buildAttributes(locusKey, reads,
+        locusIdLookup.get(locusKey));
 
     List<Allele> allAlleles = new ArrayList<>();
     allAlleles.add(refAllele);
@@ -79,9 +79,9 @@ public class VcfUtils {
 
     return new VariantContextBuilder(
         "Straglr",
-        variantKey.contig(),
-        variantKey.start(),
-        variantKey.stop(),
+        locusKey.contig(),
+        locusKey.start(),
+        locusKey.stop(),
         allAlleles
     )
         .attributes(attributes)
@@ -90,9 +90,9 @@ public class VcfUtils {
         .make();
   }
 
-  private static Allele createRefAllele(VariantKey variantKey, ReferenceSequenceFile fasta) {
+  private static Allele createRefAllele(LocusKey locusKey, ReferenceSequenceFile fasta) {
     String base = fasta
-        .getSubsequenceAt(variantKey.contig(), variantKey.start(), variantKey.start())
+        .getSubsequenceAt(locusKey.contig(), locusKey.start(), locusKey.start())
         .getBaseString();
     return Allele.create(base, true);
   }
@@ -108,7 +108,7 @@ public class VcfUtils {
   private static List<String> collectFilters(List<Read> reads) {
     return reads.stream()
         .map(Read::readStatus)
-        .filter(status -> status != ReadStatus.FULL)
+        .filter(status -> status != ReadStatus.FULL && status != ReadStatus.PARTIAL)
         .map(ReadStatus::toString)
         .distinct()
         .toList();
@@ -130,14 +130,14 @@ public class VcfUtils {
   }
 
   private static Map<String, Object> buildAttributes(
-      VariantKey variantKey,
+      LocusKey locusKey,
       List<Read> reads,
       Locus locus) {
 
     String actualRu = getMostFrequentActualRepeat(reads);
 
     Map<String, Object> attributes = new LinkedHashMap<>();
-    attributes.put("END", variantKey.stop());
+    attributes.put("END", locusKey.stop());
     attributes.put("RU_CALL", actualRu);
     attributes.put("RU_CAT", locus.catalogRepeatUnit());
     attributes.put("RU_SEEN", getRepeatUnitsWithCounts(reads));
