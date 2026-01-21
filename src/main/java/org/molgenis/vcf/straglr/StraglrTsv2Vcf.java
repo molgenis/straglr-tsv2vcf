@@ -66,7 +66,7 @@ public final class StraglrTsv2Vcf {
     }
   }
 
-  private static Map<LocusKey, List<Read>> parseLoci(List<StraglrTsvLine> lines) {
+  static Map<LocusKey, List<Read>> parseLoci(List<StraglrTsvLine> lines) {
     Map<LocusKey, List<Read>> loci = new HashMap<>();
 
     for (StraglrTsvLine line : lines) {

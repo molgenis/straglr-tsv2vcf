@@ -22,7 +22,38 @@ class AppIT {
     String outputFile = sharedTempDir.resolve("example.vcf").toString();
 
     String[] args = {
-      "-i", inputFile, "-b", bedFile, "-r", referenceFile, "-o", outputFile, "-s", "SAMPLE"
+      "-i",
+      inputFile,
+      "-b",
+      bedFile,
+      "-r",
+      referenceFile,
+      "-o",
+      outputFile,
+      "-s",
+      "SAMPLE",
+      "-c",
+      "chrX"
+    };
+    SpringApplication.run(App.class, args);
+
+    String outputVcf = Files.readString(Path.of(outputFile));
+
+    Path expectedOutputFile = ResourceUtils.getFile("classpath:example.vcf").toPath();
+    String expectedOutputVcf = Files.readString(expectedOutputFile).replaceAll("\\R", "\n");
+
+    assertEquals(expectedOutputVcf, outputVcf);
+  }
+
+  @Test
+  void testNoHaploid() throws IOException {
+    String inputFile = ResourceUtils.getFile("classpath:example.tsv").toString();
+    String referenceFile = ResourceUtils.getFile("classpath:example.fasta.gz").toString();
+    String bedFile = ResourceUtils.getFile("classpath:example.bed").toString();
+    String outputFile = sharedTempDir.resolve("example.vcf").toString();
+
+    String[] args = {
+      "-i", inputFile, "-b", bedFile, "-r", referenceFile, "-o", outputFile, "-s", "SAMPLE",
     };
     SpringApplication.run(App.class, args);
 

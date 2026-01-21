@@ -95,7 +95,9 @@ class AppCommandLineRunner implements CommandLineRunner {
     } else {
       String output;
       output =
-          commandLine.getOptionValue(AppCommandLineOptions.OPT_INPUT).replace(".tsv", "out.vcf.gz");
+          commandLine
+              .getOptionValue(AppCommandLineOptions.OPT_INPUT)
+              .replace(".tsv", ".out.vcf.gz");
       outputPath = Path.of(output);
     }
     return outputPath;

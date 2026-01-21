@@ -12,13 +12,13 @@ public enum ReadStatus {
     }
 
     String clean = tsvValue.trim().toUpperCase();
-    if (clean.startsWith("FULL") || clean.startsWith("COMPLETE")) {
+    if (clean.startsWith("FULL")) {
       return ReadStatus.FULL;
     }
-    if (clean.startsWith("PARTIAL") || clean.startsWith("INCOMPLETE")) {
+    if (clean.startsWith("PARTIAL")) {
       return ReadStatus.PARTIAL;
     }
-    if (clean.startsWith("SKIP") || clean.startsWith("IGNOR")) {
+    if (clean.startsWith("SKIPPED")) {
       return ReadStatus.SKIPPED;
     }
     return ReadStatus.FAILED;
