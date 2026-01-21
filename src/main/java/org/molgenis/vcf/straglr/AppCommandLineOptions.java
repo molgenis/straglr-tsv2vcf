@@ -5,6 +5,7 @@ import static java.lang.String.format;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Set;
+import java.util.regex.Pattern;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
@@ -117,6 +118,16 @@ class AppCommandLineOptions {
   static void validateCommandLine(CommandLine commandLine) {
     validateInput(commandLine);
     validateOutput(commandLine);
+    validateSample(commandLine);
+  }
+
+  private static void validateSample(CommandLine commandLine) {
+    String sample = commandLine.getOptionValue(OPT_SAMPLE);
+    Pattern ID_PATTERN = Pattern.compile("^[A-Za-z0-9_.-]+$");
+    if (!ID_PATTERN.matcher(sample).matches()) {
+      throw new IllegalArgumentException(
+          format("Sample name '%s' is not valid, should only have letters, number or '_','-','.'.", sample));
+    }
   }
 
   private static void validateInput(CommandLine commandLine) {
