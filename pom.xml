@@ -193,6 +193,7 @@
           <configuration>
             <compilerArgs>
               <arg>-Xlint</arg>
+              <arg>-Xlint:-processing</arg>
             </compilerArgs>
             <annotationProcessorPaths>
               <path>
