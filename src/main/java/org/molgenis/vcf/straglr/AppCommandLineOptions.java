@@ -54,7 +54,7 @@ class AppCommandLineOptions {
         Option.builder(OPT_REFERENCE)
             .hasArg(true)
             .longOpt(OPT_REFERENCE_LONG)
-            .desc("Reference sequence file (.fna).")
+            .desc("Bgzipped reference sequence file (.fna.gz, or fasta.gz).")
             .required()
             .build());
     appOptions.addOption(
@@ -74,7 +74,7 @@ class AppCommandLineOptions {
         Option.builder(OPT_OUTPUT)
             .hasArg(true)
             .longOpt(OPT_OUTPUT_LONG)
-            .desc("Output file (.tsv).")
+            .desc("Output file (.vcf or .vcf.gz).")
             .build());
     appOptions.addOption(
         Option.builder(OPT_FORCE)
@@ -132,6 +132,7 @@ class AppCommandLineOptions {
 
   private static void validateInput(CommandLine commandLine) {
     validateFile(commandLine, OPT_INPUT, Set.of(".tsv"));
+    validateFile(commandLine, OPT_OUTPUT, Set.of(".vcf", "vcf.gz"));
     validateFile(commandLine, OPT_REFERENCE, Set.of( ".fna.gz", "fasta.gz"));
     validateFile(commandLine, OPT_BED, Set.of( ".bed"));
   }
