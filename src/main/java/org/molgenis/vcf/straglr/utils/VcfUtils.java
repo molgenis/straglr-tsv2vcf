@@ -86,7 +86,7 @@ public class VcfUtils {
     )
         .attributes(attributes)
         .genotypes(genotypes)
-        .filter(filters.isEmpty() ? "PASS" : String.join(",", filters))
+        .filter(filters.isEmpty() ? "PASS" : String.join(";", filters))
         .make();
   }
 

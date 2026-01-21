@@ -109,7 +109,7 @@ class VcfUtilsTest {
   }
 
   @Test
-  void testParseAlleleInt() throws Exception {
+  void testParseAlleleInt() {
     assertEquals(10, VcfUtils.parseAlleleInt("10.0"));
   }
 

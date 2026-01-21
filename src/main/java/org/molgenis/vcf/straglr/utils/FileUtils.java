@@ -9,6 +9,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.UncheckedIOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
@@ -22,8 +24,31 @@ import org.slf4j.LoggerFactory;
 
 public class FileUtils {
   private static final Logger LOGGER = LoggerFactory.getLogger(FileUtils.class);
+
+  private FileUtils(){}
+
   public static List<StraglrTsvLine> readTsv(Path input) {
-    return readDelimitedFile(input, StraglrTsvLine.class, 1);
+    int offset = calculateOffset(input);
+    return readDelimitedFile(input, StraglrTsvLine.class, offset);
+  }
+
+  private static int calculateOffset(Path input) {
+    int skipLines = 0;
+    try (BufferedReader br = Files.newBufferedReader(input)) {
+      String line;
+      while ((line = br.readLine()) != null) {
+        if (!line.trim().startsWith("#")) {
+          if(skipLines == 0){
+            throw new IllegalStateException("No header lines found for straglr tsv.");
+          }
+          return skipLines -1;  // First non-# is header
+        }
+        skipLines++;
+      }
+    } catch (IOException e) {
+      throw new UncheckedIOException(e);
+    }
+    throw new IllegalStateException("No data lines found for straglr tsv.");
   }
 
   public static Map<LocusKey, Locus> readBed(Path input) {
@@ -46,7 +71,7 @@ public class FileUtils {
 
   private static <T> List<T> readDelimitedFile(Path input, Class<T> type, int offset) {
     try (Reader reader =
-        new BufferedReader(new InputStreamReader(new FileInputStream(input.toFile())))) {
+        new BufferedReader(new InputStreamReader(new FileInputStream(input.toFile()), StandardCharsets.UTF_8))) {
 
       CsvToBean<T> csv =
           new CsvToBeanBuilder<T>(reader)
@@ -69,8 +94,9 @@ public class FileUtils {
   static void handleCsvParseExceptions(List<CsvException> exceptions) {
     exceptions.forEach(ex -> {
       if (!ex.getLine()[0].startsWith("#")) {
-        LOGGER.error("CSV parse error at line {}: {}",
-            ex.getLineNumber(), ex.getMessage());
+        //FIXME
+        throw new IllegalStateException(String.format("CSV parse error at line %s: %s",
+            ex.getLineNumber(), ex.getMessage()));
       }
     });
   }
