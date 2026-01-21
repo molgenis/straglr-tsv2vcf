@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.regex.Pattern;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.springframework.boot.SpringApplication;
@@ -13,8 +12,7 @@ import org.springframework.util.ResourceUtils;
 
 class AppIT {
 
-  @TempDir
-  Path sharedTempDir;
+  @TempDir Path sharedTempDir;
 
   @Test
   void test() throws IOException {
@@ -23,7 +21,9 @@ class AppIT {
     String bedFile = ResourceUtils.getFile("classpath:example.bed").toString();
     String outputFile = sharedTempDir.resolve("example.vcf").toString();
 
-    String[] args = {"-i", inputFile, "-b", bedFile, "-r", referenceFile, "-o", outputFile, "-s", "SAMPLE"};
+    String[] args = {
+      "-i", inputFile, "-b", bedFile, "-r", referenceFile, "-o", outputFile, "-s", "SAMPLE"
+    };
     SpringApplication.run(App.class, args);
 
     String outputVcf = Files.readString(Path.of(outputFile));

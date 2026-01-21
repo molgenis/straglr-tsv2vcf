@@ -17,15 +17,15 @@ import java.util.List;
 import java.util.Map;
 import org.molgenis.vcf.straglr.model.CatalogLine;
 import org.molgenis.vcf.straglr.model.Locus;
-import org.molgenis.vcf.straglr.model.StraglrTsvLine;
 import org.molgenis.vcf.straglr.model.LocusKey;
+import org.molgenis.vcf.straglr.model.StraglrTsvLine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class FileUtils {
   private static final Logger LOGGER = LoggerFactory.getLogger(FileUtils.class);
 
-  private FileUtils(){}
+  private FileUtils() {}
 
   public static List<StraglrTsvLine> readTsv(Path input) {
     int offset = calculateOffset(input);
@@ -38,10 +38,10 @@ public class FileUtils {
       String line;
       while ((line = br.readLine()) != null) {
         if (!line.trim().startsWith("#")) {
-          if(skipLines == 0){
+          if (skipLines == 0) {
             throw new IllegalStateException("No header lines found for straglr tsv.");
           }
-          return skipLines -1;  // First non-# is header
+          return skipLines - 1; // First non-# is header
         }
         skipLines++;
       }
@@ -57,13 +57,15 @@ public class FileUtils {
 
     for (CatalogLine line : bedLines) {
       // BED is 0-based, VCF is 1-based
-      LocusKey key = new LocusKey(
-          line.getChrom(),
-          line.getStart() + 1,
-          line.getStop() + 1
-      );
-      lookup.put(key, new Locus(line.getChrom(), line.getStart() + 1, line.getStop() + 1,
-          line.getRepeatUnit() == null ? line.getStraglrRu() : line.getRepeatUnit(), line.getLocusId()));
+      LocusKey key = new LocusKey(line.getChrom(), line.getStart() + 1, line.getStop() + 1);
+      lookup.put(
+          key,
+          new Locus(
+              line.getChrom(),
+              line.getStart() + 1,
+              line.getStop() + 1,
+              line.getRepeatUnit() == null ? line.getStraglrRu() : line.getRepeatUnit(),
+              line.getLocusId()));
     }
 
     return lookup;
@@ -71,7 +73,8 @@ public class FileUtils {
 
   private static <T> List<T> readDelimitedFile(Path input, Class<T> type, int offset) {
     try (Reader reader =
-        new BufferedReader(new InputStreamReader(new FileInputStream(input.toFile()), StandardCharsets.UTF_8))) {
+        new BufferedReader(
+            new InputStreamReader(new FileInputStream(input.toFile()), StandardCharsets.UTF_8))) {
 
       CsvToBean<T> csv =
           new CsvToBeanBuilder<T>(reader)
@@ -92,13 +95,13 @@ public class FileUtils {
   }
 
   static void handleCsvParseExceptions(List<CsvException> exceptions) {
-    exceptions.forEach(ex -> {
-      if (!ex.getLine()[0].startsWith("#")) {
-        //FIXME
-        throw new IllegalStateException(String.format("CSV parse error at line %s: %s",
-            ex.getLineNumber(), ex.getMessage()));
-      }
-    });
+    exceptions.forEach(
+        ex -> {
+          if (!ex.getLine()[0].startsWith("#")) {
+            throw new IllegalStateException(
+                String.format(
+                    "CSV parse error at line %s: %s", ex.getLineNumber(), ex.getMessage()));
+          }
+        });
   }
-
 }

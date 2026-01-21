@@ -1,15 +1,18 @@
 package org.molgenis.vcf.straglr.utils;
+
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.HashMap;
 import java.util.stream.Collectors;
 import org.molgenis.vcf.straglr.model.Read;
 
 public class RepeatUnitUtils {
-  private RepeatUnitUtils(){}
+  private RepeatUnitUtils() {}
+
   private static final Map<Character, Set<Character>> IUPAC_EXPANSION = new HashMap<>();
+
   static {
     IUPAC_EXPANSION.put('A', Set.of('A'));
     IUPAC_EXPANSION.put('C', Set.of('C'));
@@ -61,10 +64,7 @@ public class RepeatUnitUtils {
     return reads.stream()
         .map(Read::actualRepeat)
         .filter(Objects::nonNull)
-        .collect(Collectors.groupingBy(
-            actual -> actual.replace(",", "_"),
-            Collectors.counting()
-        ))
+        .collect(Collectors.groupingBy(actual -> actual.replace(",", "_"), Collectors.counting()))
         .entrySet()
         .stream()
         .max(Map.Entry.comparingByValue())
@@ -76,14 +76,10 @@ public class RepeatUnitUtils {
     return reads.stream()
         .map(Read::actualRepeat)
         .filter(Objects::nonNull)
-        .collect(Collectors.groupingBy(
-            actual -> actual.replace(",", "_"),
-            Collectors.counting()
-        ))
+        .collect(Collectors.groupingBy(actual -> actual.replace(",", "_"), Collectors.counting()))
         .entrySet()
         .stream()
         .map(e -> e.getKey() + "(" + e.getValue() + ")")
         .toList();
   }
-
 }

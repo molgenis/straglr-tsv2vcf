@@ -47,7 +47,7 @@ class AppCommandLineRunner implements CommandLineRunner {
 
     if (args.length == 1
         && (args[0].equals("-" + AppCommandLineOptions.OPT_HELP)
-        || args[0].equals("--" + AppCommandLineOptions.OPT_HELP_LONG))) {
+            || args[0].equals("--" + AppCommandLineOptions.OPT_HELP_LONG))) {
       printUsage();
       return;
     }
@@ -58,16 +58,18 @@ class AppCommandLineRunner implements CommandLineRunner {
     try {
       Path inputPath = Path.of(commandLine.getOptionValue(AppCommandLineOptions.OPT_INPUT));
       Path inputBed = Path.of(commandLine.getOptionValue(AppCommandLineOptions.OPT_BED));
-      Path inputReference = Path.of(commandLine.getOptionValue(AppCommandLineOptions.OPT_REFERENCE));
+      Path inputReference =
+          Path.of(commandLine.getOptionValue(AppCommandLineOptions.OPT_REFERENCE));
       List<String> haploidContigs;
-      if(commandLine.hasOption(AppCommandLineOptions.OPT_HAPLOID)) {
-       haploidContigs = Arrays.asList(commandLine.getOptionValue(AppCommandLineOptions.OPT_HAPLOID).split(","));
-      }
-      else {
+      if (commandLine.hasOption(AppCommandLineOptions.OPT_HAPLOID)) {
+        haploidContigs =
+            Arrays.asList(commandLine.getOptionValue(AppCommandLineOptions.OPT_HAPLOID).split(","));
+      } else {
         haploidContigs = List.of();
       }
       String sampleName = commandLine.getOptionValue(AppCommandLineOptions.OPT_SAMPLE);
-      StraglrTsv2Vcf.run(inputPath, inputBed, inputReference, haploidContigs, getOutput(commandLine), sampleName);
+      StraglrTsv2Vcf.run(
+          inputPath, inputBed, inputReference, haploidContigs, getOutput(commandLine), sampleName);
 
     } catch (Exception e) {
       LOGGER.error(e.getLocalizedMessage(), e);
@@ -92,10 +94,8 @@ class AppCommandLineRunner implements CommandLineRunner {
       outputPath = Path.of(commandLine.getOptionValue(AppCommandLineOptions.OPT_OUTPUT));
     } else {
       String output;
-        output =
-            commandLine
-                .getOptionValue(AppCommandLineOptions.OPT_INPUT)
-                .replace(".tsv", "out.vcf.gz");
+      output =
+          commandLine.getOptionValue(AppCommandLineOptions.OPT_INPUT).replace(".tsv", "out.vcf.gz");
       outputPath = Path.of(output);
     }
     return outputPath;

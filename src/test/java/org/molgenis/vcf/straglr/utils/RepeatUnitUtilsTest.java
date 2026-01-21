@@ -1,34 +1,35 @@
 package org.molgenis.vcf.straglr.utils;
 
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+import java.util.Arrays;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.molgenis.vcf.straglr.model.Read;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-import java.util.List;
-import java.util.Arrays;
 
 @ExtendWith(MockitoExtension.class)
 class RepeatUnitUtilsTest {
 
   @ParameterizedTest
   @CsvSource({
-      "A, A, true",
-      "A, C, false",
-      "R, A, true",
-      "R, T, false",
-      "N, T, true",
-      "ACG, ACG, true",
-      "ACG, GAC, true",
-      "ACG, CGA, true",
-      "RY, AT, true"
+    "A, A, true",
+    "A, C, false",
+    "R, A, true",
+    "R, T, false",
+    "N, T, true",
+    "ACG, ACG, true",
+    "ACG, GAC, true",
+    "ACG, CGA, true",
+    "RY, AT, true"
   })
-  void testIsMatch_SameLength_MatchesWithShiftOrIUPAC(String catalog, String called, boolean expected) {
+  void testIsMatch_SameLength_MatchesWithShiftOrIUPAC(
+      String catalog, String called, boolean expected) {
     boolean result = RepeatUnitUtils.isMatch(catalog, called);
     assertEquals(expected, result, catalog + " vs " + called);
   }

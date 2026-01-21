@@ -20,31 +20,24 @@ import lombok.NoArgsConstructor;
  * @param repeatUnit the repeat unit to match with if "-" was provided to straglr
  */
 public class CatalogLine {
-  @CsvBindByPosition(
-      position = 0,
-      required = true)
+  @CsvBindByPosition(position = 0, required = true)
   String chrom;
-  @CsvBindByPosition(
-      position = 1,
-      required = true)
+
+  @CsvBindByPosition(position = 1, required = true)
   int start;
-  @CsvBindByPosition(
-      position = 2,
-      required = true)
+
+  @CsvBindByPosition(position = 2, required = true)
   int stop;
-  @CsvBindByPosition(
-      position = 3,
-      required = true)
+
+  @CsvBindByPosition(position = 3, required = true)
   String straglrRu;
-  @CsvBindByPosition(
-      position = 4,
-      required = true)
+
+  @CsvBindByPosition(position = 4, required = true)
   String gene;
-  @CsvBindByPosition(
-      position = 5,
-      required = true)
+
+  @CsvBindByPosition(position = 5, required = true)
   String locusId;
-  @CsvBindByPosition(
-      position = 6)
+
+  @CsvBindByPosition(position = 6)
   String repeatUnit;
 }

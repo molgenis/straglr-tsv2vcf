@@ -12,18 +12,18 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.molgenis.vcf.straglr.model.Locus;
-import org.molgenis.vcf.straglr.model.StraglrTsvLine;
 import org.molgenis.vcf.straglr.model.LocusKey;
+import org.molgenis.vcf.straglr.model.StraglrTsvLine;
 
 @ExtendWith(MockitoExtension.class)
 class FileUtilsTest {
 
-  @TempDir
-  Path tempDir;
+  @TempDir Path tempDir;
 
   @Test
   void testReadTsv() throws IOException {
-    String tsv = """
+    String tsv =
+        """
       #header line that should be skipped
       #chrom\tstart\tend\ttarget_repeat\tlocus\tcoverage\tgenotype\tread_name\tactual_repeat\tcopy_number\tsize\tread_start\tstrand\tallele\tread_status
       chr1\t149390802\t149390841\tGGC\tchr1:149390802-149390841\t33\t20.0(19);8.5(14)\t04d31d3d-91e4-4a6a-9e95-2c9d50c99295\tGGC\t20.3\t61\t3881\t-\t20.0\tfull

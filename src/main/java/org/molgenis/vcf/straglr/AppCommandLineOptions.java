@@ -93,11 +93,7 @@ class AppCommandLineOptions {
     APP_VERSION_OPTIONS = appVersionOptions;
     Options appHelpOptions = new Options();
     appHelpOptions.addOption(
-        Option.builder(OPT_HELP)
-            .required()
-            .longOpt(OPT_HELP_LONG)
-            .desc("Print usage.")
-            .build());
+        Option.builder(OPT_HELP).required().longOpt(OPT_HELP_LONG).desc("Print usage.").build());
     APP_HELP_OPTIONS = appHelpOptions;
   }
 
@@ -126,38 +122,36 @@ class AppCommandLineOptions {
     Pattern ID_PATTERN = Pattern.compile("^[A-Za-z0-9_.-]+$");
     if (!ID_PATTERN.matcher(sample).matches()) {
       throw new IllegalArgumentException(
-          format("Sample name '%s' is not valid, should only have letters, number or '_','-','.'.", sample));
+          format(
+              "Sample name '%s' is not valid, should only have letters, number or '_','-','.'.",
+              sample));
     }
   }
 
   private static void validateInput(CommandLine commandLine) {
     validateFile(commandLine, OPT_INPUT, Set.of(".tsv"));
-    validateFile(commandLine, OPT_OUTPUT, Set.of(".vcf", "vcf.gz"));
-    validateFile(commandLine, OPT_REFERENCE, Set.of( ".fna.gz", "fasta.gz"));
-    validateFile(commandLine, OPT_BED, Set.of( ".bed"));
+    validateFile(commandLine, OPT_REFERENCE, Set.of(".fna.gz", "fasta.gz"));
+    validateFile(commandLine, OPT_BED, Set.of(".bed"));
   }
 
   private static void validateFile(CommandLine commandLine, String option, Set<String> extensions) {
     if (commandLine.hasOption(option)) {
       Path inputPath = Path.of(commandLine.getOptionValue(option));
       if (!Files.exists(inputPath)) {
-        throw new IllegalArgumentException(
-            format("Input file '%s' does not exist.", inputPath));
+        throw new IllegalArgumentException(format("Input file '%s' does not exist.", inputPath));
       }
       if (Files.isDirectory(inputPath)) {
-        throw new IllegalArgumentException(
-            format("Input file '%s' is a directory.", inputPath));
+        throw new IllegalArgumentException(format("Input file '%s' is a directory.", inputPath));
       }
       if (!Files.isReadable(inputPath)) {
-        throw new IllegalArgumentException(
-            format("Input file '%s' is not readable.", inputPath));
+        throw new IllegalArgumentException(format("Input file '%s' is not readable.", inputPath));
       }
       String inputPathStr = inputPath.toString();
       boolean isCorrectExtension = extensions.stream().anyMatch(inputPathStr::endsWith);
       if (!isCorrectExtension) {
         throw new IllegalArgumentException(
-            String.format("Input file '%s' is not one of: %s",
-                inputPathStr, String.join(", ", extensions)));
+            String.format(
+                "Input file '%s' is not one of: %s", inputPathStr, String.join(", ", extensions)));
       }
     }
   }
@@ -170,8 +164,7 @@ class AppCommandLineOptions {
     Path outputPath = Path.of(commandLine.getOptionValue(OPT_OUTPUT));
 
     if (!commandLine.hasOption(OPT_FORCE) && Files.exists(outputPath)) {
-      throw new IllegalArgumentException(
-          format("Output file '%s' already exists", outputPath));
+      throw new IllegalArgumentException(format("Output file '%s' already exists", outputPath));
     }
   }
 }

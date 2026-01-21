@@ -1,5 +1,8 @@
 package org.molgenis.vcf.straglr.utils;
 
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
 import htsjdk.samtools.SAMSequenceDictionary;
 import htsjdk.samtools.SAMSequenceRecord;
 import htsjdk.samtools.reference.IndexedFastaSequenceFile;
@@ -7,17 +10,14 @@ import htsjdk.samtools.reference.ReferenceSequence;
 import htsjdk.variant.variantcontext.*;
 import htsjdk.variant.vcf.VCFHeader;
 import htsjdk.variant.vcf.VCFHeaderLine;
+import java.util.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.molgenis.vcf.straglr.model.Locus;
+import org.molgenis.vcf.straglr.model.LocusKey;
 import org.molgenis.vcf.straglr.model.Read;
 import org.molgenis.vcf.straglr.model.ReadStatus;
-import org.molgenis.vcf.straglr.model.LocusKey;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
-
-import java.util.*;
 
 @ExtendWith(MockitoExtension.class)
 class VcfUtilsTest {
@@ -30,7 +30,8 @@ class VcfUtilsTest {
     Read skipped = mock(Read.class);
     when(skipped.readStatus()).thenReturn(ReadStatus.SKIPPED);
     List<Read> reads = List.of(skipped);
-    VariantContext result = VcfUtils.createStrVcfLine(key, reads, List.of(), fasta, Map.of(key, locus), "SAMPLE");
+    VariantContext result =
+        VcfUtils.createStrVcfLine(key, reads, List.of(), fasta, Map.of(key, locus), "SAMPLE");
     assertNull(result);
   }
 
@@ -52,7 +53,8 @@ class VcfUtilsTest {
     List<Read> reads = List.of(read);
     List<String> haploidContigs = List.of("chr1");
 
-    VariantContext vc = VcfUtils.createStrVcfLine(key, reads, haploidContigs, fasta, Map.of(key, locus), "SAMPLE");
+    VariantContext vc =
+        VcfUtils.createStrVcfLine(key, reads, haploidContigs, fasta, Map.of(key, locus), "SAMPLE");
     assertNotNull(vc);
     assertEquals("PASS", vc.getFilters().stream().findFirst().get());
     assertEquals(1, vc.getGenotypes().size());
@@ -77,10 +79,11 @@ class VcfUtilsTest {
     when(read.readStatus()).thenReturn(ReadStatus.FULL);
     when(read.actualRepeat()).thenReturn("AT");
     List<Read> reads = List.of(read);
-    List<String> diploidContigs = List.of();  // chr1 not haploid
+    List<String> diploidContigs = List.of(); // chr1 not haploid
 
-    VariantContext vc = VcfUtils.createStrVcfLine(key, reads, diploidContigs, fasta, Map.of(key, locus), "SAMPLE");
-    assertEquals(2, vc.getGenotype(SAMPLE_NAME).getAlleles().size());  // 0/0
+    VariantContext vc =
+        VcfUtils.createStrVcfLine(key, reads, diploidContigs, fasta, Map.of(key, locus), "SAMPLE");
+    assertEquals(2, vc.getGenotype(SAMPLE_NAME).getAlleles().size()); // 0/0
   }
 
   @Test
@@ -104,7 +107,8 @@ class VcfUtilsTest {
     when(refSeq.getBaseString()).thenReturn("A");
     when(fasta.getSubsequenceAt(anyString(), anyLong(), anyLong())).thenReturn(refSeq);
 
-    VariantContext vc = VcfUtils.createStrVcfLine(key, reads, List.of(), fasta, Map.of(key, locus), "SAMPLE");
+    VariantContext vc =
+        VcfUtils.createStrVcfLine(key, reads, List.of(), fasta, Map.of(key, locus), "SAMPLE");
     assertEquals("FAILED", vc.getFilters().stream().findFirst().get());
   }
 
@@ -115,9 +119,12 @@ class VcfUtilsTest {
 
   @Test
   void testVariantComparator() {
-    VariantContext vc1 = new VariantContextBuilder("test", "chr1", 100, 100, List.of(Allele.REF_A)).make();
-    VariantContext vc2 = new VariantContextBuilder("test", "chr1", 200, 200, List.of(Allele.REF_A)).make();
-    VariantContext vc3 = new VariantContextBuilder("test", "chr2", 100, 100, List.of(Allele.REF_A)).make();
+    VariantContext vc1 =
+        new VariantContextBuilder("test", "chr1", 100, 100, List.of(Allele.REF_A)).make();
+    VariantContext vc2 =
+        new VariantContextBuilder("test", "chr1", 200, 200, List.of(Allele.REF_A)).make();
+    VariantContext vc3 =
+        new VariantContextBuilder("test", "chr2", 100, 100, List.of(Allele.REF_A)).make();
 
     Comparator<VariantContext> comp = VcfUtils.variantComparator();
     assertEquals(-1, comp.compare(vc1, vc2));
@@ -139,12 +146,20 @@ class VcfUtilsTest {
   void testAddAltHeaders() {
     Allele alt1 = Allele.create("<STR10>");
     Allele alt2 = Allele.create("<STR12>");
-    VariantContext vc = new VariantContextBuilder("test", "chr1", 100, 100, List.of(Allele.REF_A, alt1, alt2)).make();
+    VariantContext vc =
+        new VariantContextBuilder("test", "chr1", 100, 100, List.of(Allele.REF_A, alt1, alt2))
+            .make();
 
     Set<VCFHeaderLine> lines = new HashSet<>();
     VcfUtils.addAltHeaders(lines, List.of(vc));
     assertEquals(2, lines.size());
-    assertTrue(lines.stream().anyMatch(l -> l.getKey().equals("ALT") && l.toString().contains("Short tandem repeat (STR) allele of length 12.")));
+    assertTrue(
+        lines.stream()
+            .anyMatch(
+                l ->
+                    l.getKey().equals("ALT")
+                        && l.toString()
+                            .contains("Short tandem repeat (STR) allele of length 12.")));
   }
 
   private static final String SAMPLE_NAME = "SAMPLE";
