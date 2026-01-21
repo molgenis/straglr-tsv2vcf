@@ -1,7 +1,8 @@
 # straglr-tsv2vcf
 Java tool to create a vcf from the [straglr](https://github.com/bcgsc/straglr) tsv output.
-This tool creates a VCF 4.2 file in a format that can be annotated with [stranger](https://github.com/Clinical-Genomics/stranger).
-The vcf output of the straglr tool itself is VCF 4.5 that cannot be used downstream in VIP and the content is not suitable for Stranger.
+This tool creates a VCF 4.2 file (for htsjdk support in downstream tools) in a format that can be annotated with [stranger](https://github.com/Clinical-Genomics/stranger).
+The VCF output of the straglr tool itself is VCF 4.5 that cannot be used downstream in VIP and the content is not suitable for Stranger.
+Since the catalog bed file is required to create the VCF this tool is only suitable for usage with output of straglr in the "targetted" mode, and not for the "genome scan" mode.
 
 ## Usage
 ``` 
