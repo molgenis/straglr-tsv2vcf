@@ -17,7 +17,7 @@ class AppCommandLineOptions {
   static final String OPT_BED_LONG = "bed";
   static final String OPT_REFERENCE = "r";
   static final String OPT_REFERENCE_LONG = "reference";
-  static final String OPT_HAPLOID = "h";
+  static final String OPT_HAPLOID = "c";
   static final String OPT_HAPLOID_LONG = "haploid_contigs";
   static final String OPT_SAMPLE = "s";
   static final String OPT_SAMPLE_LONG = "sample";
@@ -27,7 +27,10 @@ class AppCommandLineOptions {
   static final String OPT_FORCE_LONG = "force";
   static final String OPT_VERSION = "v";
   static final String OPT_VERSION_LONG = "version";
+  static final String OPT_HELP = "h";
+  static final String OPT_HELP_LONG = "help";
   private static final Options APP_OPTIONS;
+  private static final Options APP_HELP_OPTIONS;
   private static final Options APP_VERSION_OPTIONS;
 
   static {
@@ -87,6 +90,14 @@ class AppCommandLineOptions {
             .desc("Print version.")
             .build());
     APP_VERSION_OPTIONS = appVersionOptions;
+    Options appHelpOptions = new Options();
+    appHelpOptions.addOption(
+        Option.builder(OPT_HELP)
+            .required()
+            .longOpt(OPT_HELP_LONG)
+            .desc("Print usage.")
+            .build());
+    APP_HELP_OPTIONS = appHelpOptions;
   }
 
   private AppCommandLineOptions() {}
@@ -97,6 +108,10 @@ class AppCommandLineOptions {
 
   static Options getAppVersionOptions() {
     return APP_VERSION_OPTIONS;
+  }
+
+  static Options getAppHelpOptions() {
+    return APP_HELP_OPTIONS;
   }
 
   static void validateCommandLine(CommandLine commandLine) {

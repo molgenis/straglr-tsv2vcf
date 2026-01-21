@@ -4,7 +4,6 @@ import static java.util.Objects.requireNonNull;
 
 import java.nio.file.Path;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -46,6 +45,13 @@ class AppCommandLineRunner implements CommandLineRunner {
       return;
     }
 
+    if (args.length == 1
+        && (args[0].equals("-" + AppCommandLineOptions.OPT_HELP)
+        || args[0].equals("--" + AppCommandLineOptions.OPT_HELP_LONG))) {
+      printUsage();
+      return;
+    }
+
     CommandLine commandLine = getCommandLine(args);
     AppCommandLineOptions.validateCommandLine(commandLine);
 
@@ -53,9 +59,12 @@ class AppCommandLineRunner implements CommandLineRunner {
       Path inputPath = Path.of(commandLine.getOptionValue(AppCommandLineOptions.OPT_INPUT));
       Path inputBed = Path.of(commandLine.getOptionValue(AppCommandLineOptions.OPT_BED));
       Path inputReference = Path.of(commandLine.getOptionValue(AppCommandLineOptions.OPT_REFERENCE));
-      List<String> haploidContigs = Collections.emptyList();
+      List<String> haploidContigs;
       if(commandLine.hasOption(AppCommandLineOptions.OPT_HAPLOID)) {
        haploidContigs = Arrays.asList(commandLine.getOptionValue(AppCommandLineOptions.OPT_HAPLOID).split(","));
+      }
+      else {
+        haploidContigs = List.of();
       }
       String sampleName = commandLine.getOptionValue(AppCommandLineOptions.OPT_SAMPLE);
       StraglrTsv2Vcf.run(inputPath, inputBed, inputReference, haploidContigs, getOutput(commandLine), sampleName);
@@ -97,6 +106,10 @@ class AppCommandLineRunner implements CommandLineRunner {
     LOGGER.error(e.getLocalizedMessage(), e);
 
     // following information is only logged to system out
+    printUsage();
+  }
+
+  private void printUsage() {
     System.out.println();
     HelpFormatter formatter = new HelpFormatter();
     formatter.setOptionComparator(null);
@@ -104,5 +117,7 @@ class AppCommandLineRunner implements CommandLineRunner {
     formatter.printHelp(cmdLineSyntax, AppCommandLineOptions.getAppOptions(), true);
     System.out.println();
     formatter.printHelp(cmdLineSyntax, AppCommandLineOptions.getAppVersionOptions(), true);
+    System.out.println();
+    formatter.printHelp(cmdLineSyntax, AppCommandLineOptions.getAppHelpOptions(), true);
   }
 }
