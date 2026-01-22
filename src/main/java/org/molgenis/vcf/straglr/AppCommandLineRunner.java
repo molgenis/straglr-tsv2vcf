@@ -57,7 +57,7 @@ class AppCommandLineRunner implements CommandLineRunner {
 
     try {
       Path inputPath = Path.of(commandLine.getOptionValue(AppCommandLineOptions.OPT_INPUT));
-      Path inputBed = Path.of(commandLine.getOptionValue(AppCommandLineOptions.OPT_BED));
+      Path inputBed = Path.of(commandLine.getOptionValue(AppCommandLineOptions.OPT_LOCI));
       Path inputReference =
           Path.of(commandLine.getOptionValue(AppCommandLineOptions.OPT_REFERENCE));
       List<String> haploidContigs;

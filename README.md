@@ -9,7 +9,7 @@ Since the catalog bed file is required to create the VCF this tool is only suita
 usage: java -jar straglrTsv2Vcf.jar -i <arg> -b <arg> -r <arg> [-c <arg>]
        -s <arg> [-o <arg>] [-f]
  -i,--input <arg>             Straglr tsv file.
- -b,--bed <arg>               bed catalog file (.bed).
+ -l,--loci <arg>              Loci (catalog) file used for straglr run (.tsv).
  -r,--reference <arg>         Reference sequence file (.fna).
  -c,--haploid_contigs <arg>   Comma separated list of haploid contigs.
  -s,--sample <arg>            Sample name to be used in the VCF.
@@ -23,6 +23,17 @@ usage: java -jar straglrTsv2Vcf.jar -v
 usage: java -jar straglrTsv2Vcf.jar -h
  -h,--help   Print usage.
  ```
+
+## Loci input
+
+The loci file should contain these columns, in this order:
+1) chrom: contig identifier
+2) start: 0 based start position
+3) stop: 0-based stop position
+4) straglrRu: the repeat unit provided to straglr
+5) gene: the gene of the locus
+6) locusId: the identifier of the locus
+7) repeatUnit: the repeat unit to match with if "-" was provided to straglr
 
 ## Example output
 ```

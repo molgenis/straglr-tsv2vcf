@@ -18,14 +18,14 @@ class AppIT {
   void test() throws IOException {
     String inputFile = ResourceUtils.getFile("classpath:example.tsv").toString();
     String referenceFile = ResourceUtils.getFile("classpath:example.fasta.gz").toString();
-    String bedFile = ResourceUtils.getFile("classpath:example.bed").toString();
+    String lociFile = ResourceUtils.getFile("classpath:example_loci.tsv").toString();
     String outputFile = sharedTempDir.resolve("example.vcf").toString();
 
     String[] args = {
       "-i",
       inputFile,
-      "-b",
-      bedFile,
+      "-l",
+      lociFile,
       "-r",
       referenceFile,
       "-o",
@@ -49,11 +49,11 @@ class AppIT {
   void testNoHaploid() throws IOException {
     String inputFile = ResourceUtils.getFile("classpath:example.tsv").toString();
     String referenceFile = ResourceUtils.getFile("classpath:example.fasta.gz").toString();
-    String bedFile = ResourceUtils.getFile("classpath:example.bed").toString();
+    String lociFile = ResourceUtils.getFile("classpath:example_loci.tsv").toString();
     String outputFile = sharedTempDir.resolve("example.vcf").toString();
 
     String[] args = {
-      "-i", inputFile, "-b", bedFile, "-r", referenceFile, "-o", outputFile, "-s", "SAMPLE",
+      "-i", inputFile, "-l", lociFile, "-r", referenceFile, "-o", outputFile, "-s", "SAMPLE",
     };
     SpringApplication.run(App.class, args);
 

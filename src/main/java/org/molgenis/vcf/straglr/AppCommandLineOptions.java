@@ -14,8 +14,8 @@ class AppCommandLineOptions {
 
   static final String OPT_INPUT = "i";
   static final String OPT_INPUT_LONG = "input";
-  static final String OPT_BED = "b";
-  static final String OPT_BED_LONG = "bed";
+  static final String OPT_LOCI = "l";
+  static final String OPT_LOCI_LONG = "loci";
   static final String OPT_REFERENCE = "r";
   static final String OPT_REFERENCE_LONG = "reference";
   static final String OPT_HAPLOID = "c";
@@ -44,10 +44,10 @@ class AppCommandLineOptions {
             .required()
             .build());
     appOptions.addOption(
-        Option.builder(OPT_BED)
+        Option.builder(OPT_LOCI)
             .hasArg(true)
-            .longOpt(OPT_BED_LONG)
-            .desc("bed catalog file (.bed).")
+            .longOpt(OPT_LOCI_LONG)
+            .desc("Loci (catalog) file used for running straglr (.tsv).")
             .required()
             .build());
     appOptions.addOption(
@@ -131,7 +131,7 @@ class AppCommandLineOptions {
   private static void validateInput(CommandLine commandLine) {
     validateFile(commandLine, OPT_INPUT, Set.of(".tsv"));
     validateFile(commandLine, OPT_REFERENCE, Set.of(".fna.gz", "fasta.gz"));
-    validateFile(commandLine, OPT_BED, Set.of(".bed"));
+    validateFile(commandLine, OPT_LOCI, Set.of(".tsv"));
   }
 
   private static void validateFile(CommandLine commandLine, String option, Set<String> extensions) {

@@ -29,7 +29,7 @@ public class FileUtils {
 
   public static List<StraglrTsvLine> readTsv(Path input) {
     int offset = calculateOffset(input);
-    return readDelimitedFile(input, StraglrTsvLine.class, offset);
+    return readStraglrOutputFile(input, StraglrTsvLine.class, offset);
   }
 
   private static int calculateOffset(Path input) {
@@ -51,8 +51,8 @@ public class FileUtils {
     throw new IllegalStateException("No data lines found for straglr tsv.");
   }
 
-  public static Map<LocusKey, Locus> readBed(Path input) {
-    List<CatalogLine> bedLines = readDelimitedFile(input, CatalogLine.class, 0);
+  public static Map<LocusKey, Locus> readLoci(Path input) {
+    List<CatalogLine> bedLines = readStraglrOutputFile(input, CatalogLine.class, 0);
     Map<LocusKey, Locus> lookup = new HashMap<>();
 
     for (CatalogLine line : bedLines) {
@@ -71,7 +71,7 @@ public class FileUtils {
     return lookup;
   }
 
-  private static <T> List<T> readDelimitedFile(Path input, Class<T> type, int offset) {
+  private static <T> List<T> readStraglrOutputFile(Path input, Class<T> type, int offset) {
     try (Reader reader =
         new BufferedReader(
             new InputStreamReader(new FileInputStream(input.toFile()), StandardCharsets.UTF_8))) {

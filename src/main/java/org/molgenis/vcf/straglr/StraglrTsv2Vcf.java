@@ -1,6 +1,6 @@
 package org.molgenis.vcf.straglr;
 
-import static org.molgenis.vcf.straglr.utils.FileUtils.readBed;
+import static org.molgenis.vcf.straglr.utils.FileUtils.readLoci;
 import static org.molgenis.vcf.straglr.utils.FileUtils.readTsv;
 import static org.molgenis.vcf.straglr.utils.VcfUtils.createVcfWriter;
 import static org.molgenis.vcf.straglr.utils.VcfUtils.variantComparator;
@@ -39,7 +39,7 @@ public final class StraglrTsv2Vcf {
 
     List<StraglrTsvLine> straglrTsvLines = readTsv(inputTsv);
     Map<LocusKey, List<Read>> readsPerLocus = parseLoci(straglrTsvLines);
-    Map<LocusKey, Locus> locusLookup = readBed(inputBed);
+    Map<LocusKey, Locus> locusLookup = readLoci(inputBed);
 
     try (ReferenceSequenceFile fasta =
         new BlockCompressedIndexedFastaSequenceFile(inputReference)) {

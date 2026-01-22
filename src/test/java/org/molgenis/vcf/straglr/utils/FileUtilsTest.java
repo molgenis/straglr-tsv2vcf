@@ -47,7 +47,7 @@ class FileUtilsTest {
   }
 
   @Test
-  void testReadBed() throws IOException {
+  void testReadLoci() throws IOException {
     String bed =
         "chrX\t67545316\t67545385\t-\tAR\tAR\tGCA\n"
             + "chr12\t6936716\t6936773\t-\tATN1\tATN1\tCNG";
@@ -55,7 +55,7 @@ class FileUtilsTest {
     Path file = tempDir.resolve("regions.bed");
     Files.writeString(file, bed);
 
-    Map<LocusKey, Locus> lookup = FileUtils.readBed(file);
+    Map<LocusKey, Locus> lookup = FileUtils.readLoci(file);
 
     assertEquals(2, lookup.size());
 
