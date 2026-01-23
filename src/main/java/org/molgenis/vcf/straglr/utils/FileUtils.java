@@ -32,7 +32,7 @@ public class FileUtils {
 
   private static int calculateOffset(Path input) {
     int skipLines = 0;
-    try (BufferedReader br = Files.newBufferedReader(input)) {
+    try (BufferedReader br = Files.newBufferedReader(input, StandardCharsets.UTF_8)) {
       String line;
       while ((line = br.readLine()) != null) {
         if (!line.trim().startsWith("#")) {
