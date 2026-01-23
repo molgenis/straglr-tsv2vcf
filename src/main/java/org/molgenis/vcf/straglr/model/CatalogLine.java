@@ -20,7 +20,7 @@ public class CatalogLine {
   @CsvBindByPosition(position = 1, required = true)
   int start;
 
-  /** stop 0-based stop position */
+  /** stop 0-based, non-inclusive, stop position */
   @CsvBindByPosition(position = 2, required = true)
   int stop;
 

@@ -54,14 +54,15 @@ public class FileUtils {
     Map<LocusKey, CatalogRepeatLocus> lookup = new HashMap<>();
 
     for (CatalogLine line : bedLines) {
-      // BED is 0-based, VCF is 1-based
-      LocusKey key = new LocusKey(line.getChrom(), line.getStart() + 1, line.getStop() + 1);
+      // BED to VCF -> 0 based to 1 based, but end unchanged because it also moves from
+      // non-inclusive to inclusive
+      LocusKey key = new LocusKey(line.getChrom(), line.getStart() + 1, line.getStop());
       lookup.put(
           key,
           new CatalogRepeatLocus(
               line.getChrom(),
               line.getStart() + 1,
-              line.getStop() + 1,
+              line.getStop(),
               line.getRepeatUnit() == null ? line.getStraglrRu() : line.getRepeatUnit(),
               line.getLocusId()));
     }

@@ -40,7 +40,7 @@ class StraglrTsv2VcfTest {
     assertEquals(result.size(), 1);
     assertEquals(
         List.of(new Read("name", "ABC", "22.0", "22", "123", "strand", "22.0", ReadStatus.FULL)),
-        result.get(new LocusKey("TEST", 124, 457)));
+        result.get(new LocusKey("TEST", 124, 456)));
   }
 
   @Test
@@ -70,7 +70,7 @@ class StraglrTsv2VcfTest {
     assertEquals(result.size(), 1);
     assertEquals(
         List.of(new Read("name", "ABC", "22.0", "22", "123", "strand", "22.0", ReadStatus.PARTIAL)),
-        result.get(new LocusKey("TEST", 124, 457)));
+        result.get(new LocusKey("TEST", 124, 456)));
   }
 
   @Test
@@ -100,7 +100,7 @@ class StraglrTsv2VcfTest {
     assertEquals(result.size(), 1);
     assertEquals(
         List.of(new Read("name", "ABC", "22.0", "22", "123", "strand", "22.0", ReadStatus.FAILED)),
-        result.get(new LocusKey("TEST", 124, 457)));
+        result.get(new LocusKey("TEST", 124, 456)));
   }
 
   @Test
@@ -130,7 +130,7 @@ class StraglrTsv2VcfTest {
     assertEquals(result.size(), 1);
     assertEquals(
         List.of(new Read("name", "ABC", "22.0", "22", "123", "strand", "22.0", ReadStatus.SKIPPED)),
-        result.get(new LocusKey("TEST", 124, 457)));
+        result.get(new LocusKey("TEST", 124, 456)));
   }
 
   @Test

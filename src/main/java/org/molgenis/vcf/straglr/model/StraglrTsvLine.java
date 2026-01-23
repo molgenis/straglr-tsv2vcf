@@ -15,7 +15,7 @@ public class StraglrTsvLine {
   @CsvBindByName(column = "#chrom", required = true)
   String chrom;
 
-  /** 0-based start coordinate of locus*/
+  /** 0-based start coordinate of locus */
   @CsvBindByName(column = "start", required = true)
   int start;
 

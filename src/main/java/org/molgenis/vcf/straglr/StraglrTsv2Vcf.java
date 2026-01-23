@@ -72,7 +72,9 @@ public final class StraglrTsv2Vcf {
     Map<LocusKey, List<Read>> loci = new HashMap<>();
 
     for (StraglrTsvLine line : lines) {
-      LocusKey locus = new LocusKey(line.getChrom(), line.getStart() + 1, line.getEnd() + 1);
+      // bed to vcf -> obased to one based, but end unchanged because it also moves from
+      // non-inclusive to inclusive
+      LocusKey locus = new LocusKey(line.getChrom(), line.getStart() + 1, line.getEnd());
 
       if ("NA".equals(line.getAllele())) {
         continue;

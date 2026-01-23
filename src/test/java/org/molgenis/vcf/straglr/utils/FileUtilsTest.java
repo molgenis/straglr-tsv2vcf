@@ -59,8 +59,8 @@ class FileUtilsTest {
 
     assertEquals(2, lookup.size());
 
-    LocusKey key1 = new LocusKey("chrX", 67545317, 67545386);
-    LocusKey key2 = new LocusKey("chr12", 6936717, 6936774);
+    LocusKey key1 = new LocusKey("chrX", 67545317, 67545385);
+    LocusKey key2 = new LocusKey("chr12", 6936717, 6936773);
 
     assertTrue(lookup.containsKey(key1));
     assertTrue(lookup.containsKey(key2));
@@ -68,7 +68,7 @@ class FileUtilsTest {
     CatalogRepeatLocus catalogRepeatLocus = lookup.get(key1);
     assertEquals("chrX", catalogRepeatLocus.chrom());
     assertEquals(67545317, catalogRepeatLocus.start());
-    assertEquals(67545386, catalogRepeatLocus.stop());
+    assertEquals(67545385, catalogRepeatLocus.stop());
     assertEquals("GCA", catalogRepeatLocus.catalogRepeatUnit());
     assertEquals("AR", catalogRepeatLocus.identifier());
   }
