@@ -2,14 +2,16 @@ package org.molgenis.vcf.straglr;
 
 import static java.util.Objects.requireNonNull;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
-import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.ParseException;
+import org.apache.commons.cli.help.HelpFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -113,13 +115,25 @@ class AppCommandLineRunner implements CommandLineRunner {
 
   private void printUsage() {
     System.out.println();
-    HelpFormatter formatter = new HelpFormatter();
-    formatter.setOptionComparator(null);
+    HelpFormatter formatter = HelpFormatter.builder().get();
     String cmdLineSyntax = "java -jar " + appName + ".jar";
-    formatter.printHelp(cmdLineSyntax, AppCommandLineOptions.getAppOptions(), true);
-    System.out.println();
-    formatter.printHelp(cmdLineSyntax, AppCommandLineOptions.getAppVersionOptions(), true);
-    System.out.println();
-    formatter.printHelp(cmdLineSyntax, AppCommandLineOptions.getAppHelpOptions(), true);
+
+    try {
+      formatter.printHelp(
+          cmdLineSyntax,
+          "", // header
+          AppCommandLineOptions.getAppOptions(),
+          "", // footer
+          true);
+      System.out.println();
+
+      formatter.printHelp(
+          cmdLineSyntax, "", AppCommandLineOptions.getAppVersionOptions(), "", true);
+      System.out.println();
+
+      formatter.printHelp(cmdLineSyntax, "", AppCommandLineOptions.getAppHelpOptions(), "", true);
+    } catch (IOException e) {
+      throw new UncheckedIOException(e);
+    }
   }
 }
