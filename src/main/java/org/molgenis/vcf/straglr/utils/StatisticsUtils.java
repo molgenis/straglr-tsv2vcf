@@ -7,25 +7,28 @@ import org.molgenis.vcf.straglr.model.Read;
 
 public class StatisticsUtils {
 
-  public static String calculateREPCI(List<Read> reads, float confidenceLevel, String locus) {
+  public static String calculateConfidenceInterval(List<Read> reads, double confidenceLevel) {
+    if (confidenceLevel < 0 || confidenceLevel > 1) {
+      throw new IllegalArgumentException(
+          String.format(
+              "Confidence level '%s' is not allows, please provide a value between 0 and 1.",
+              confidenceLevel));
+    }
     double[] ruCounts = reads.stream().mapToDouble(Read::copyNumber).toArray();
 
     if (ruCounts.length < 2) {
-      throw new IllegalStateException(
-          String.format(
-              "Too little copies '%s' for position '%s'.",
-              ruCounts.length, locus));
+      return "NA";
     }
 
     DescriptiveStatistics stats = new DescriptiveStatistics(ruCounts);
     double mean = stats.getMean();
     double sem = stats.getStandardDeviation() / Math.sqrt(stats.getN());
     TDistribution tDist = new TDistribution(stats.getN() - 1);
-    double margin = tDist.inverseCumulativeProbability(confidenceLevel) * sem;
+    double margin = tDist.inverseCumulativeProbability((1 + confidenceLevel) / 2) * sem;
 
-    int lower = (int) Math.round(mean - margin);
-    int upper = (int) Math.round(mean + margin);
+    double lower = mean - margin;
+    double upper = mean + margin;
 
-    return lower + "-" + upper;
+    return String.format("%.1f-%.1f", lower, upper);
   }
 }

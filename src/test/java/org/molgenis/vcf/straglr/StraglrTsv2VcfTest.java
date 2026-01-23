@@ -24,10 +24,10 @@ class StraglrTsv2VcfTest {
             .locus("TEST:123-456")
             .actualRepeat("ABC")
             .coverage(30)
-            .readStart("123")
+            .readStart(123)
             .targetRepeat("DEF")
-            .copyNumber("22.0")
-            .size("22")
+            .copyNumber(22.0)
+            .size(22)
             .readStatus("full")
             .readName("name")
             .strand("strand")
@@ -39,7 +39,7 @@ class StraglrTsv2VcfTest {
 
     assertEquals(result.size(), 1);
     assertEquals(
-        List.of(new Read("name", "ABC", "22.0", "22", "123", "strand", "22.0", ReadStatus.FULL)),
+        List.of(new Read("name", "ABC", 22.0, 22, 123, "strand", "22.0", ReadStatus.FULL)),
         result.get(new LocusKey("TEST", 124, 456)));
   }
 
@@ -54,10 +54,10 @@ class StraglrTsv2VcfTest {
             .locus("TEST:123-456")
             .actualRepeat("ABC")
             .coverage(30)
-            .readStart("123")
+            .readStart(123)
             .targetRepeat("DEF")
-            .copyNumber("22.0")
-            .size("22")
+            .copyNumber(22.0)
+            .size(22)
             .readStatus("partial (not complete)")
             .readName("name")
             .strand("strand")
@@ -69,7 +69,7 @@ class StraglrTsv2VcfTest {
 
     assertEquals(result.size(), 1);
     assertEquals(
-        List.of(new Read("name", "ABC", "22.0", "22", "123", "strand", "22.0", ReadStatus.PARTIAL)),
+        List.of(new Read("name", "ABC", 22.0, 22, 123, "strand", "22.0", ReadStatus.PARTIAL)),
         result.get(new LocusKey("TEST", 124, 456)));
   }
 
@@ -84,10 +84,10 @@ class StraglrTsv2VcfTest {
             .locus("TEST:123-456")
             .actualRepeat("ABC")
             .coverage(30)
-            .readStart("123")
+            .readStart(123)
             .targetRepeat("DEF")
-            .copyNumber("22.0")
-            .size("22")
+            .copyNumber(22.0)
+            .size(22)
             .readStatus("failed (not good)")
             .readName("name")
             .strand("strand")
@@ -99,7 +99,7 @@ class StraglrTsv2VcfTest {
 
     assertEquals(result.size(), 1);
     assertEquals(
-        List.of(new Read("name", "ABC", "22.0", "22", "123", "strand", "22.0", ReadStatus.FAILED)),
+        List.of(new Read("name", "ABC", 22.0, 22, 123, "strand", "22.0", ReadStatus.FAILED)),
         result.get(new LocusKey("TEST", 124, 456)));
   }
 
@@ -114,10 +114,10 @@ class StraglrTsv2VcfTest {
             .locus("TEST:123-456")
             .actualRepeat("ABC")
             .coverage(30)
-            .readStart("123")
+            .readStart(123)
             .targetRepeat("DEF")
-            .copyNumber("22.0")
-            .size("22")
+            .copyNumber(22.0)
+            .size(22)
             .readStatus("skipped (unmatched ru)")
             .readName("name")
             .strand("strand")
@@ -129,7 +129,7 @@ class StraglrTsv2VcfTest {
 
     assertEquals(result.size(), 1);
     assertEquals(
-        List.of(new Read("name", "ABC", "22.0", "22", "123", "strand", "22.0", ReadStatus.SKIPPED)),
+        List.of(new Read("name", "ABC", 22.0, 22, 123, "strand", "22.0", ReadStatus.SKIPPED)),
         result.get(new LocusKey("TEST", 124, 456)));
   }
 
@@ -144,10 +144,10 @@ class StraglrTsv2VcfTest {
             .locus("TEST:123-456")
             .actualRepeat("ABC")
             .coverage(30)
-            .readStart("123")
+            .readStart(123)
             .targetRepeat("DEF")
-            .copyNumber("22.0")
-            .size("22")
+            .copyNumber(22.0)
+            .size(22)
             .readStatus("failed")
             .build();
     List<StraglrTsvLine> testLines = new ArrayList<>();
