@@ -29,7 +29,7 @@ usage: java -jar straglrTsv2Vcf.jar -h
 The loci file should contain these columns, in this order:
 1) chrom: contig identifier
 2) start: 0 based start position
-3) stop: 0-based stop position
+3) stop: 0-based, exclusive, stop position
 4) straglrRu: the repeat unit provided to straglr
 5) gene: the gene of the catalogRepeatLocus
 6) locusId: the identifier of the catalogRepeatLocus

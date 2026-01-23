@@ -19,7 +19,7 @@ public class StraglrTsvLine {
   @CsvBindByName(column = "start", required = true)
   int start;
 
-  /** 0-based end coordinate of locus */
+  /** 0-based, exclusive, end coordinate of locus */
   @CsvBindByName(column = "end", required = true)
   int end;
 

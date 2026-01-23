@@ -41,11 +41,13 @@
     <java.version>25</java.version>
     <commons.cli.version>1.11.0</commons.cli.version>
     <jacoco-maven-plugin.version>0.8.14</jacoco-maven-plugin.version>
+    <mockito.version>5.21.0</mockito.version>
     <maven.surefire.plugin.version>3.5.4</maven.surefire.plugin.version>
     <opencsv.version>5.11</opencsv.version>
     <version.lombok>1.18.42</version.lombok>
     <samtools.htsjdk.version>4.3.0</samtools.htsjdk.version>
     <spotless.maven.plugin.version>3.0.0</spotless.maven.plugin.version>
+    <maven.dependency.plugin.version>3.8.1</maven.dependency.plugin.version>
   </properties>
 
   <profiles>
@@ -152,6 +154,16 @@
         <artifactId>htsjdk</artifactId>
         <version>${samtools.htsjdk.version}</version>
       </dependency>
+      <dependency>
+        <groupId>org.mockito</groupId>
+        <artifactId>mockito-core</artifactId>
+        <version>${mockito.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.mockito</groupId>
+        <artifactId>mockito-junit-jupiter</artifactId>
+        <version>${mockito.version}</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 
@@ -180,6 +192,16 @@
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-core</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-junit-jupiter</artifactId>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -211,6 +233,7 @@
           <artifactId>maven-surefire-plugin</artifactId>
           <version>${maven.surefire.plugin.version}</version>
           <configuration>
+            <argLine>-javaagent:"${org.mockito:mockito-core:jar}" ${argLine}</argLine>
             <includes>
               <include>**/*Test.java</include>
               <include>**/*IT.java</include>
@@ -224,6 +247,17 @@
           <groupId>org.jacoco</groupId>
           <artifactId>jacoco-maven-plugin</artifactId>
           <version>${jacoco-maven-plugin.version}</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-dependency-plugin</artifactId>
+          <executions>
+            <execution>
+              <goals>
+                <goal>properties</goal>
+              </goals>
+            </execution>
+          </executions>
         </plugin>
       </plugins>
     </pluginManagement>
@@ -245,7 +279,8 @@
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-failsafe-plugin</artifactId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <version>${maven.dependency.plugin.version}</version>
       </plugin>
       <plugin>
         <groupId>com.diffplug.spotless</groupId>
