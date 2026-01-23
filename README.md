@@ -6,7 +6,7 @@ Since the catalog bed file is required to create the VCF this tool is only suita
 
 ## Usage
 ``` 
-usage: java -jar straglrTsv2Vcf.jar -i <arg> -b <arg> -r <arg> [-c <arg>]
+usage: java -jar straglrTsv2Vcf.jar -i <arg> -l <arg> -r <arg> [-c <arg>]
        -s <arg> [-o <arg>] [-f]
  -i,--input <arg>             Straglr tsv file.
  -l,--loci <arg>              Loci (catalog) file used for straglr run (.tsv).
