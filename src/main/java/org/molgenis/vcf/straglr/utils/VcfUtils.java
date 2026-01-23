@@ -2,6 +2,7 @@ package org.molgenis.vcf.straglr.utils;
 
 import static org.molgenis.vcf.straglr.utils.RepeatUnitUtils.getMostFrequentActualRepeat;
 import static org.molgenis.vcf.straglr.utils.RepeatUnitUtils.getRepeatUnitsWithCounts;
+import static org.molgenis.vcf.straglr.utils.StatisticsUtils.calculateREPCI;
 
 import htsjdk.samtools.SAMSequenceDictionary;
 import htsjdk.samtools.SAMSequenceRecord;
@@ -59,8 +60,8 @@ public class VcfUtils {
     List<String> filters = collectFilters(reads);
     Allele refAllele = createRefAllele(locusKey, fasta);
 
-    Map<Allele, Integer> alleleCounts = countAltAlleles(reads);
-    int[] ad = alleleCounts.values().stream().mapToInt(Integer::intValue).toArray();
+    Map<Allele, List<Read>> alleleCounts = getReadsPerAllele(reads);
+    int[] ad = alleleCounts.values().stream().mapToInt(List::size).toArray();
 
     List<Allele> genotypeAlleles =
         determineGenotypeAlleles(alleleCounts.keySet(), locusKey.contig(), haploidContigs);
@@ -91,12 +92,13 @@ public class VcfUtils {
     return Allele.create(base, true);
   }
 
-  private static Map<Allele, Integer> countAltAlleles(List<Read> reads) {
+  private static Map<Allele, List<Read>> getReadsPerAllele(List<Read> reads) {
     return reads.stream()
         .collect(
             Collectors.groupingBy(
                 read -> Allele.create("<STR" + parseAlleleInt(read.allele()) + ">"),
-                Collectors.summingInt(r -> 1)));
+                Collectors.mapping(read -> read, Collectors.toList()) // List<Read> per allele
+                ));
   }
 
   private static List<String> collectFilters(List<Read> reads) {
@@ -125,6 +127,20 @@ public class VcfUtils {
       LocusKey locusKey, List<Read> reads, CatalogRepeatLocus catalogRepeatLocus) {
 
     String actualRu = getMostFrequentActualRepeat(reads);
+    Map<String, List<Read>> readsByAllele =
+        reads.stream().collect(Collectors.groupingBy(Read::allele));
+
+    String ruCopyNumbers =
+        readsByAllele.values().stream()
+            .map(alleleReads -> (reads.size()))
+            .map(size -> Integer.toString(size))
+            .collect(Collectors.joining(","));
+
+    String confidenceIntervals =
+        readsByAllele.values().stream()
+            .map(alleleReads -> calculateREPCI(reads, 95, reads.getFirst().locus()))
+            .sorted()
+            .collect(Collectors.joining(","));
 
     Map<String, Object> attributes = new LinkedHashMap<>();
     attributes.put("END", locusKey.stop());
@@ -134,6 +150,10 @@ public class VcfUtils {
     attributes.put("REPID", catalogRepeatLocus.identifier());
     attributes.put(
         "RU_MATCH", RepeatUnitUtils.isMatch(catalogRepeatLocus.catalogRepeatUnit(), actualRu));
+    attributes.put("REPID", locus.identifier());
+    attributes.put("RU_MATCH", RepeatUnitUtils.isMatch(locus.catalogRepeatUnit(), actualRu));
+    attributes.put("RU_NR", ruCopyNumbers);
+    attributes.put("RU_CI", confidenceIntervals);
 
     return attributes;
   }
@@ -211,6 +231,18 @@ public class VcfUtils {
             VCFHeaderLineCount.UNBOUNDED,
             VCFHeaderLineType.String,
             "All RUs encountered with read counts"));
+    headerLines.add(
+        new VCFFormatHeaderLine(
+            "RU_NR",
+            VCFHeaderLineCount.A,
+            VCFHeaderLineType.String,
+            "Number of repeat units per allele."));
+    headerLines.add(
+        new VCFFormatHeaderLine(
+            "RU_CI",
+            VCFHeaderLineCount.A,
+            VCFHeaderLineType.String,
+            "95% confidence interval per allele."));
   }
 
   private static void addFormatHeaders(Set<VCFHeaderLine> headerLines) {

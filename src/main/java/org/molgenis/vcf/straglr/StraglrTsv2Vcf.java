@@ -83,6 +83,7 @@ public final class StraglrTsv2Vcf {
       Read read =
           new Read(
               line.getReadName(),
+              String.format("%s:%s-%s",line.getChrom(), line.getStart(), line.getEnd()),
               line.getActualRepeat(),
               line.getCopyNumber(),
               line.getSize(),
