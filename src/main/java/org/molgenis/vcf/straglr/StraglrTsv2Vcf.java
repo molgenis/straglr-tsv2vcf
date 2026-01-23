@@ -16,7 +16,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.molgenis.vcf.straglr.model.Locus;
+import java.util.Objects;
+import org.molgenis.vcf.straglr.model.CatalogRepeatLocus;
 import org.molgenis.vcf.straglr.model.LocusKey;
 import org.molgenis.vcf.straglr.model.Read;
 import org.molgenis.vcf.straglr.model.ReadStatus;
@@ -39,7 +40,7 @@ public final class StraglrTsv2Vcf {
 
     List<StraglrTsvLine> straglrTsvLines = readTsv(inputTsv);
     Map<LocusKey, List<Read>> readsPerLocus = parseLoci(straglrTsvLines);
-    Map<LocusKey, Locus> locusLookup = readLoci(inputBed);
+    Map<LocusKey, CatalogRepeatLocus> locusLookup = readLoci(inputBed);
 
     try (ReferenceSequenceFile fasta =
         new BlockCompressedIndexedFastaSequenceFile(inputReference)) {
@@ -55,6 +56,7 @@ public final class StraglrTsv2Vcf {
                           fasta,
                           locusLookup,
                           sampleName))
+              .filter(Objects::nonNull)
               .sorted(variantComparator())
               .toList();
 

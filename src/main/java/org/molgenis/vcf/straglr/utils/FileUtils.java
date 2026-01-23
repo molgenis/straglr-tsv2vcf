@@ -4,9 +4,7 @@ import com.opencsv.bean.CsvToBean;
 import com.opencsv.bean.CsvToBeanBuilder;
 import com.opencsv.exceptions.CsvException;
 import java.io.BufferedReader;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
@@ -16,7 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.molgenis.vcf.straglr.model.CatalogLine;
-import org.molgenis.vcf.straglr.model.Locus;
+import org.molgenis.vcf.straglr.model.CatalogRepeatLocus;
 import org.molgenis.vcf.straglr.model.LocusKey;
 import org.molgenis.vcf.straglr.model.StraglrTsvLine;
 import org.slf4j.Logger;
@@ -51,16 +49,16 @@ public class FileUtils {
     throw new IllegalStateException("No data lines found for straglr tsv.");
   }
 
-  public static Map<LocusKey, Locus> readLoci(Path input) {
+  public static Map<LocusKey, CatalogRepeatLocus> readLoci(Path input) {
     List<CatalogLine> bedLines = readStraglrOutputFile(input, CatalogLine.class, 0);
-    Map<LocusKey, Locus> lookup = new HashMap<>();
+    Map<LocusKey, CatalogRepeatLocus> lookup = new HashMap<>();
 
     for (CatalogLine line : bedLines) {
       // BED is 0-based, VCF is 1-based
       LocusKey key = new LocusKey(line.getChrom(), line.getStart() + 1, line.getStop() + 1);
       lookup.put(
           key,
-          new Locus(
+          new CatalogRepeatLocus(
               line.getChrom(),
               line.getStart() + 1,
               line.getStop() + 1,
@@ -72,9 +70,7 @@ public class FileUtils {
   }
 
   private static <T> List<T> readStraglrOutputFile(Path input, Class<T> type, int offset) {
-    try (Reader reader =
-        new BufferedReader(
-            new InputStreamReader(new FileInputStream(input.toFile()), StandardCharsets.UTF_8))) {
+    try (Reader reader = Files.newBufferedReader(input, StandardCharsets.UTF_8)) {
 
       CsvToBean<T> csv =
           new CsvToBeanBuilder<T>(reader)

@@ -33,7 +33,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import org.molgenis.vcf.straglr.model.Locus;
+import org.molgenis.vcf.straglr.model.CatalogRepeatLocus;
 import org.molgenis.vcf.straglr.model.LocusKey;
 import org.molgenis.vcf.straglr.model.Read;
 import org.molgenis.vcf.straglr.model.ReadStatus;
@@ -45,7 +45,7 @@ public class VcfUtils {
       List<Read> inputReads,
       List<String> haploidContigs,
       ReferenceSequenceFile fasta,
-      Map<LocusKey, Locus> locusIdLookup,
+      Map<LocusKey, CatalogRepeatLocus> locusIdLookup,
       String sampleName) {
 
     List<Read> reads =
@@ -122,17 +122,18 @@ public class VcfUtils {
   }
 
   private static Map<String, Object> buildAttributes(
-      LocusKey locusKey, List<Read> reads, Locus locus) {
+      LocusKey locusKey, List<Read> reads, CatalogRepeatLocus catalogRepeatLocus) {
 
     String actualRu = getMostFrequentActualRepeat(reads);
 
     Map<String, Object> attributes = new LinkedHashMap<>();
     attributes.put("END", locusKey.stop());
     attributes.put("RU_CALL", actualRu);
-    attributes.put("RU_CAT", locus.catalogRepeatUnit());
+    attributes.put("RU_CAT", catalogRepeatLocus.catalogRepeatUnit());
     attributes.put("RU_SEEN", getRepeatUnitsWithCounts(reads));
-    attributes.put("REPID", locus.identifier());
-    attributes.put("RU_MATCH", RepeatUnitUtils.isMatch(locus.catalogRepeatUnit(), actualRu));
+    attributes.put("REPID", catalogRepeatLocus.identifier());
+    attributes.put(
+        "RU_MATCH", RepeatUnitUtils.isMatch(catalogRepeatLocus.catalogRepeatUnit(), actualRu));
 
     return attributes;
   }

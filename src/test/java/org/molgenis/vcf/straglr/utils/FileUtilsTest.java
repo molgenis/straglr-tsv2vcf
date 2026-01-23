@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.molgenis.vcf.straglr.model.Locus;
+import org.molgenis.vcf.straglr.model.CatalogRepeatLocus;
 import org.molgenis.vcf.straglr.model.LocusKey;
 import org.molgenis.vcf.straglr.model.StraglrTsvLine;
 
@@ -55,7 +55,7 @@ class FileUtilsTest {
     Path file = tempDir.resolve("regions.bed");
     Files.writeString(file, bed);
 
-    Map<LocusKey, Locus> lookup = FileUtils.readLoci(file);
+    Map<LocusKey, CatalogRepeatLocus> lookup = FileUtils.readLoci(file);
 
     assertEquals(2, lookup.size());
 
@@ -65,11 +65,11 @@ class FileUtilsTest {
     assertTrue(lookup.containsKey(key1));
     assertTrue(lookup.containsKey(key2));
 
-    Locus locus = lookup.get(key1);
-    assertEquals("chrX", locus.chrom());
-    assertEquals(67545317, locus.start());
-    assertEquals(67545386, locus.stop());
-    assertEquals("GCA", locus.catalogRepeatUnit());
-    assertEquals("AR", locus.identifier());
+    CatalogRepeatLocus catalogRepeatLocus = lookup.get(key1);
+    assertEquals("chrX", catalogRepeatLocus.chrom());
+    assertEquals(67545317, catalogRepeatLocus.start());
+    assertEquals(67545386, catalogRepeatLocus.stop());
+    assertEquals("GCA", catalogRepeatLocus.catalogRepeatUnit());
+    assertEquals("AR", catalogRepeatLocus.identifier());
   }
 }

@@ -7,5 +7,5 @@ package org.molgenis.vcf.straglr.model;
  * @param catalogRepeatUnit Repeat unit as specified in the straglr loci (catalog) file
  * @param identifier Locus identifier from straglr loci (catalog) file
  */
-public record Locus(
+public record CatalogRepeatLocus(
     String chrom, int start, int stop, String catalogRepeatUnit, String identifier) {}

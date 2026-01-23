@@ -14,7 +14,7 @@ import java.util.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.molgenis.vcf.straglr.model.Locus;
+import org.molgenis.vcf.straglr.model.CatalogRepeatLocus;
 import org.molgenis.vcf.straglr.model.LocusKey;
 import org.molgenis.vcf.straglr.model.Read;
 import org.molgenis.vcf.straglr.model.ReadStatus;
@@ -25,22 +25,23 @@ class VcfUtilsTest {
   @Test
   void testCreateStrVcfLine_SkippedReads_ReturnsNull() {
     IndexedFastaSequenceFile fasta = mock(IndexedFastaSequenceFile.class);
-    Locus locus = mock(Locus.class);
+    CatalogRepeatLocus catalogRepeatLocus = mock(CatalogRepeatLocus.class);
     LocusKey key = new LocusKey("chr1", 100, 103);
     Read skipped = mock(Read.class);
     when(skipped.readStatus()).thenReturn(ReadStatus.SKIPPED);
     List<Read> reads = List.of(skipped);
     VariantContext result =
-        VcfUtils.createStrVcfLine(key, reads, List.of(), fasta, Map.of(key, locus), "SAMPLE");
+        VcfUtils.createStrVcfLine(
+            key, reads, List.of(), fasta, Map.of(key, catalogRepeatLocus), "SAMPLE");
     assertNull(result);
   }
 
   @Test
   void testCreateStrVcfLine_HaploidContig_SingleAllele() {
     IndexedFastaSequenceFile fasta = mock(IndexedFastaSequenceFile.class);
-    Locus locus = mock(Locus.class);
-    when(locus.catalogRepeatUnit()).thenReturn("AT");
-    when(locus.identifier()).thenReturn("STR1");
+    CatalogRepeatLocus catalogRepeatLocus = mock(CatalogRepeatLocus.class);
+    when(catalogRepeatLocus.catalogRepeatUnit()).thenReturn("AT");
+    when(catalogRepeatLocus.identifier()).thenReturn("STR1");
     LocusKey key = new LocusKey("chr1", 100, 103);
     ReferenceSequence refSeq = mock(ReferenceSequence.class);
     when(refSeq.getBaseString()).thenReturn("A");
@@ -54,7 +55,8 @@ class VcfUtilsTest {
     List<String> haploidContigs = List.of("chr1");
 
     VariantContext vc =
-        VcfUtils.createStrVcfLine(key, reads, haploidContigs, fasta, Map.of(key, locus), "SAMPLE");
+        VcfUtils.createStrVcfLine(
+            key, reads, haploidContigs, fasta, Map.of(key, catalogRepeatLocus), "SAMPLE");
     assertNotNull(vc);
     assertEquals("PASS", vc.getFilters().stream().findFirst().get());
     assertEquals(1, vc.getGenotypes().size());
@@ -65,9 +67,9 @@ class VcfUtilsTest {
   @Test
   void testCreateStrVcfLine_DiploidContig_DuplicateAllele() {
     IndexedFastaSequenceFile fasta = mock(IndexedFastaSequenceFile.class);
-    Locus locus = mock(Locus.class);
-    when(locus.catalogRepeatUnit()).thenReturn("AT");
-    when(locus.identifier()).thenReturn("STR1");
+    CatalogRepeatLocus catalogRepeatLocus = mock(CatalogRepeatLocus.class);
+    when(catalogRepeatLocus.catalogRepeatUnit()).thenReturn("AT");
+    when(catalogRepeatLocus.identifier()).thenReturn("STR1");
     LocusKey key = new LocusKey("chr1", 100, 103);
 
     ReferenceSequence refSeq = mock(ReferenceSequence.class);
@@ -82,16 +84,17 @@ class VcfUtilsTest {
     List<String> diploidContigs = List.of(); // chr1 not haploid
 
     VariantContext vc =
-        VcfUtils.createStrVcfLine(key, reads, diploidContigs, fasta, Map.of(key, locus), "SAMPLE");
+        VcfUtils.createStrVcfLine(
+            key, reads, diploidContigs, fasta, Map.of(key, catalogRepeatLocus), "SAMPLE");
     assertEquals(2, vc.getGenotype(SAMPLE_NAME).getAlleles().size()); // 0/0
   }
 
   @Test
   void testCreateStrVcfLine_WithFilters() {
     IndexedFastaSequenceFile fasta = mock(IndexedFastaSequenceFile.class);
-    Locus locus = mock(Locus.class);
-    when(locus.catalogRepeatUnit()).thenReturn("AT");
-    when(locus.identifier()).thenReturn("STR1");
+    CatalogRepeatLocus catalogRepeatLocus = mock(CatalogRepeatLocus.class);
+    when(catalogRepeatLocus.catalogRepeatUnit()).thenReturn("AT");
+    when(catalogRepeatLocus.identifier()).thenReturn("STR1");
     LocusKey key = new LocusKey("chr1", 100, 103);
     Read full = mock(Read.class);
     when(full.allele()).thenReturn("10.0");
@@ -108,7 +111,8 @@ class VcfUtilsTest {
     when(fasta.getSubsequenceAt(anyString(), anyLong(), anyLong())).thenReturn(refSeq);
 
     VariantContext vc =
-        VcfUtils.createStrVcfLine(key, reads, List.of(), fasta, Map.of(key, locus), "SAMPLE");
+        VcfUtils.createStrVcfLine(
+            key, reads, List.of(), fasta, Map.of(key, catalogRepeatLocus), "SAMPLE");
     assertEquals("FAILED", vc.getFilters().stream().findFirst().get());
   }
 
