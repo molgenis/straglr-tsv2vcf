@@ -42,45 +42,45 @@ class AppCommandLineOptions {
             .longOpt(OPT_INPUT_LONG)
             .desc("Straglr tsv file.")
             .required()
-            .build());
+            .get());
     appOptions.addOption(
         Option.builder(OPT_LOCI)
             .hasArg(true)
             .longOpt(OPT_LOCI_LONG)
             .desc("Loci (catalog) file used for running straglr (.tsv).")
             .required()
-            .build());
+            .get());
     appOptions.addOption(
         Option.builder(OPT_REFERENCE)
             .hasArg(true)
             .longOpt(OPT_REFERENCE_LONG)
             .desc("Bgzipped reference sequence file (.fna.gz, or fasta.gz).")
             .required()
-            .build());
+            .get());
     appOptions.addOption(
         Option.builder(OPT_HAPLOID)
             .hasArg(true)
             .longOpt(OPT_HAPLOID_LONG)
             .desc("Comma separated list of haploid contigs.")
-            .build());
+            .get());
     appOptions.addOption(
         Option.builder(OPT_SAMPLE)
             .hasArg(true)
             .longOpt(OPT_SAMPLE_LONG)
             .desc("Sample name to be used in the VCF.")
             .required()
-            .build());
+            .get());
     appOptions.addOption(
         Option.builder(OPT_OUTPUT)
             .hasArg(true)
             .longOpt(OPT_OUTPUT_LONG)
             .desc("Output file (.vcf or .vcf.gz).")
-            .build());
+            .get());
     appOptions.addOption(
         Option.builder(OPT_FORCE)
             .longOpt(OPT_FORCE_LONG)
             .desc("Override the output file if it already exists.")
-            .build());
+            .get());
 
     APP_OPTIONS = appOptions;
     Options appVersionOptions = new Options();
@@ -89,11 +89,11 @@ class AppCommandLineOptions {
             .required()
             .longOpt(OPT_VERSION_LONG)
             .desc("Print version.")
-            .build());
+            .get());
     APP_VERSION_OPTIONS = appVersionOptions;
     Options appHelpOptions = new Options();
     appHelpOptions.addOption(
-        Option.builder(OPT_HELP).required().longOpt(OPT_HELP_LONG).desc("Print usage.").build());
+        Option.builder(OPT_HELP).required().longOpt(OPT_HELP_LONG).desc("Print usage.").get());
     APP_HELP_OPTIONS = appHelpOptions;
   }
 
