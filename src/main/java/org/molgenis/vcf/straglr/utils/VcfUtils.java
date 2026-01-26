@@ -2,6 +2,7 @@ package org.molgenis.vcf.straglr.utils;
 
 import static org.molgenis.vcf.straglr.utils.RepeatUnitUtils.getMostFrequentActualRepeat;
 import static org.molgenis.vcf.straglr.utils.RepeatUnitUtils.getRepeatUnitsWithCounts;
+import static org.molgenis.vcf.straglr.utils.StatisticsUtils.calculateConfidenceInterval;
 
 import htsjdk.samtools.SAMSequenceDictionary;
 import htsjdk.samtools.SAMSequenceRecord;
@@ -59,21 +60,28 @@ public class VcfUtils {
     List<String> filters = collectFilters(reads);
     Allele refAllele = createRefAllele(locusKey, fasta);
 
-    Map<Allele, Integer> alleleCounts = countAltAlleles(reads);
-    int[] ad = alleleCounts.values().stream().mapToInt(Integer::intValue).toArray();
+    Map<String, List<Read>> alleleCounts = getReadsPerAllele(reads);
+    int[] ad = alleleCounts.values().stream().mapToInt(List::size).toArray();
 
+    Set<Allele> alleles =
+        alleleCounts.keySet().stream()
+            .map(
+                count ->
+                    Allele.create(String.format("<STR%s>", Math.round(Float.parseFloat(count)))))
+            .collect(Collectors.toSet());
     List<Allele> genotypeAlleles =
-        determineGenotypeAlleles(alleleCounts.keySet(), locusKey.contig(), haploidContigs);
+        determineGenotypeAlleles(alleles, locusKey.contig(), haploidContigs);
 
     GenotypesContext genotypes =
         GenotypesContext.create(
             new GenotypeBuilder(sampleName).alleles(genotypeAlleles).DP(dp).AD(ad).make());
 
-    Map<String, Object> attributes = buildAttributes(locusKey, reads, locusIdLookup.get(locusKey));
+    Map<String, Object> attributes =
+        buildAttributes(locusKey, reads, locusIdLookup.get(locusKey), alleleCounts.keySet());
 
     List<Allele> allAlleles = new ArrayList<>();
     allAlleles.add(refAllele);
-    allAlleles.addAll(alleleCounts.keySet());
+    allAlleles.addAll(alleles);
 
     return new VariantContextBuilder(
             "Straglr", locusKey.contig(), locusKey.start(), locusKey.stop(), allAlleles)
@@ -91,12 +99,13 @@ public class VcfUtils {
     return Allele.create(base, true);
   }
 
-  private static Map<Allele, Integer> countAltAlleles(List<Read> reads) {
+  private static Map<String, List<Read>> getReadsPerAllele(List<Read> reads) {
     return reads.stream()
         .collect(
             Collectors.groupingBy(
-                read -> Allele.create("<STR" + parseAlleleInt(read.allele()) + ">"),
-                Collectors.summingInt(r -> 1)));
+                Read::allele,
+                Collectors.mapping(read -> read, Collectors.toList()) // List<Read> per allele
+                ));
   }
 
   private static List<String> collectFilters(List<Read> reads) {
@@ -122,9 +131,19 @@ public class VcfUtils {
   }
 
   private static Map<String, Object> buildAttributes(
-      LocusKey locusKey, List<Read> reads, CatalogRepeatLocus catalogRepeatLocus) {
+      LocusKey locusKey,
+      List<Read> reads,
+      CatalogRepeatLocus catalogRepeatLocus,
+      Set<String> repeatUnitCounts) {
 
     String actualRu = getMostFrequentActualRepeat(reads);
+    Map<String, List<Read>> readsByAllele =
+        reads.stream().collect(Collectors.groupingBy(Read::allele));
+
+    String confidenceIntervals =
+        readsByAllele.values().stream()
+            .map(readList -> calculateConfidenceInterval(readList, 0.95))
+            .collect(Collectors.joining(","));
 
     Map<String, Object> attributes = new LinkedHashMap<>();
     attributes.put("END", locusKey.stop());
@@ -134,6 +153,8 @@ public class VcfUtils {
     attributes.put("REPID", catalogRepeatLocus.identifier());
     attributes.put(
         "RU_MATCH", RepeatUnitUtils.isMatch(catalogRepeatLocus.catalogRepeatUnit(), actualRu));
+    attributes.put("RU_NR", String.join(",", repeatUnitCounts));
+    attributes.put("RU_CI", confidenceIntervals);
 
     return attributes;
   }
@@ -172,7 +193,7 @@ public class VcfUtils {
         .collect(Collectors.toSet())
         .forEach(
             alt -> {
-              int repeatLen = Integer.parseInt(alt.substring(4, alt.length() - 1));
+              int repeatLen = Math.round(Float.parseFloat(alt.substring(4, alt.length() - 1)));
               headerLines.add(
                   new VCFAltHeaderLine(
                       String.format(
@@ -211,6 +232,18 @@ public class VcfUtils {
             VCFHeaderLineCount.UNBOUNDED,
             VCFHeaderLineType.String,
             "All RUs encountered with read counts"));
+    headerLines.add(
+        new VCFInfoHeaderLine(
+            "RU_NR",
+            VCFHeaderLineCount.A,
+            VCFHeaderLineType.String,
+            "Number of repeat units per allele."));
+    headerLines.add(
+        new VCFInfoHeaderLine(
+            "RU_CI",
+            VCFHeaderLineCount.A,
+            VCFHeaderLineType.String,
+            "95% confidence interval per allele. 'NA' if less than 2 reads were present."));
   }
 
   private static void addFormatHeaders(Set<VCFHeaderLine> headerLines) {

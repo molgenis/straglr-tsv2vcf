@@ -40,7 +40,7 @@ class FileUtilsTest {
     assertEquals(149390802, line.getStart());
     assertEquals(149390841, line.getEnd());
     assertEquals("20.0", line.getAllele());
-    assertEquals("3881", line.getReadStart());
+    assertEquals(3881, line.getReadStart());
     assertEquals("full", line.getReadStatus());
     assertEquals("GGC", line.getTargetRepeat());
     assertEquals("GGC", line.getActualRepeat());

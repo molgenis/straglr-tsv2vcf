@@ -55,15 +55,15 @@ public class StraglrTsvLine {
 
   /** number of copies of repeat in allele */
   @CsvBindByName(column = "copy_number", required = true)
-  String copyNumber;
+  double copyNumber;
 
   /** size of allele */
   @CsvBindByName(column = "size", required = true)
-  String size;
+  double size;
 
   /** start position of repeat in support read */
   @CsvBindByName(column = "read_start", required = true)
-  String readStart;
+  int readStart;
 
   /** strand of reference genome from which read originates */
   @CsvBindByName(column = "strand", required = true)
