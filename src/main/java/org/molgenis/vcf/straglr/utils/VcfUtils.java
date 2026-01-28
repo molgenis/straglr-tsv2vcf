@@ -155,6 +155,8 @@ public class VcfUtils {
         "RU_MATCH", RepeatUnitUtils.isMatch(catalogRepeatLocus.catalogRepeatUnit(), actualRu));
     attributes.put("RU_NR", String.join(",", repeatUnitCounts));
     attributes.put("RU_CI", confidenceIntervals);
+    // Used in vip-report
+    attributes.put("SVTYPE", "STR");
 
     return attributes;
   }
@@ -244,6 +246,9 @@ public class VcfUtils {
             VCFHeaderLineCount.A,
             VCFHeaderLineType.String,
             "95% confidence interval per allele. 'NA' if less than 2 reads were present."));
+    // Used in vip-report
+    headerLines.add(
+        new VCFInfoHeaderLine("SVTYPE", 1, VCFHeaderLineType.String, "Type of structural variant"));
   }
 
   private static void addFormatHeaders(Set<VCFHeaderLine> headerLines) {

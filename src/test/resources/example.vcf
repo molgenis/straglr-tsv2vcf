@@ -14,8 +14,9 @@
 ##INFO=<ID=RU_MATCH,Number=0,Type=Flag,Description="RU call matches catalog (allowing shift/IUPAC)">
 ##INFO=<ID=RU_NR,Number=A,Type=String,Description="Number of repeat units per allele.">
 ##INFO=<ID=RU_SEEN,Number=.,Type=String,Description="All RUs encountered with read counts">
+##INFO=<ID=SVTYPE,Number=1,Type=String,Description="Type of structural variant">
 ##contig=<ID=1,length=101>
 ##contig=<ID=2,length=101>
 #CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	SAMPLE
-1	2	.	T	<STR9>,<STR20>	.	PASS	END=10;REPID=AR;RU_CALL=GGC;RU_CAT=GCA;RU_CI=11.4-24.2,6.5-10.4;RU_NR=20.0,8.5;RU_SEEN=GGC(4)	GT:AD:DP	1/2:2,2:4
-2	2	.	T	<STR17>	.	PASS	END=11;REPID=ATN1;RU_CALL=CAG;RU_CAT=CNG;RU_CI=14.3-20.0;RU_MATCH;RU_NR=17.0;RU_SEEN=CAG(4)	GT:AD:DP	1/1:4:4
+1	2	.	T	<STR9>,<STR20>	.	PASS	END=10;REPID=AR;RU_CALL=GGC;RU_CAT=GCA;RU_CI=11.4-24.2,6.5-10.4;RU_NR=20.0,8.5;RU_SEEN=GGC(4);SVTYPE=STR	GT:AD:DP	1/2:2,2:4
+2	2	.	T	<STR17>	.	PASS	END=11;REPID=ATN1;RU_CALL=CAG;RU_CAT=CNG;RU_CI=14.3-20.0;RU_MATCH;RU_NR=17.0;RU_SEEN=CAG(4);SVTYPE=STR	GT:AD:DP	1/1:4:4
