@@ -1,5 +1,6 @@
 package org.molgenis.vcf.straglr.utils;
 
+import static org.molgenis.vcf.straglr.model.ReadStatus.FULL;
 import static org.molgenis.vcf.straglr.utils.RepeatUnitUtils.getMostFrequentActualRepeat;
 import static org.molgenis.vcf.straglr.utils.RepeatUnitUtils.getRepeatUnitsWithCounts;
 import static org.molgenis.vcf.straglr.utils.StatisticsUtils.calculateConfidenceInterval;
@@ -56,12 +57,17 @@ public class VcfUtils {
       return null;
     }
 
-    int dp = reads.size();
+    int locusCoverage = reads.size();
     List<String> filters = collectFilters(reads);
     Allele refAllele = createRefAllele(locusKey, fasta);
 
     Map<String, List<Read>> alleleCounts = getReadsPerAllele(reads);
     int[] ad = alleleCounts.values().stream().mapToInt(List::size).toArray();
+    int[] spanningReads =
+        alleleCounts.values().stream()
+            .map(r -> r.stream().filter(read -> read.readStatus() == FULL).toList())
+            .mapToInt(List::size)
+            .toArray();
 
     Set<Allele> alleles =
         alleleCounts.keySet().stream()
@@ -72,9 +78,15 @@ public class VcfUtils {
     List<Allele> genotypeAlleles =
         determineGenotypeAlleles(alleles, locusKey.contig(), haploidContigs);
 
+    Map<String, Object> formatAttributes = Map.of("RU_SPAN", spanningReads, "LC", locusCoverage);
+
     GenotypesContext genotypes =
         GenotypesContext.create(
-            new GenotypeBuilder(sampleName).alleles(genotypeAlleles).DP(dp).AD(ad).make());
+            new GenotypeBuilder(sampleName)
+                .alleles(genotypeAlleles)
+                .AD(ad)
+                .attributes(formatAttributes)
+                .make());
 
     Map<String, Object> attributes =
         buildAttributes(locusKey, reads, locusIdLookup.get(locusKey), alleleCounts.keySet());
@@ -111,7 +123,7 @@ public class VcfUtils {
   private static List<String> collectFilters(List<Read> reads) {
     return reads.stream()
         .map(Read::readStatus)
-        .filter(status -> status != ReadStatus.FULL && status != ReadStatus.PARTIAL)
+        .filter(status -> status != FULL && status != ReadStatus.PARTIAL)
         .map(ReadStatus::toString)
         .distinct()
         .toList();
@@ -253,10 +265,19 @@ public class VcfUtils {
 
   private static void addFormatHeaders(Set<VCFHeaderLine> headerLines) {
     headerLines.add(new VCFFormatHeaderLine("GT", 1, VCFHeaderLineType.String, "Genotype"));
-    headerLines.add(new VCFFormatHeaderLine("DP", 1, VCFHeaderLineType.Integer, "Read depth"));
+    headerLines.add(new VCFFormatHeaderLine("LC", 1, VCFHeaderLineType.Integer, "Locus coverage"));
     headerLines.add(
         new VCFFormatHeaderLine(
-            "AD", VCFHeaderLineCount.UNBOUNDED, VCFHeaderLineType.Integer, "Allelic depths"));
+            "AD",
+            VCFHeaderLineCount.A,
+            VCFHeaderLineType.Integer,
+            "Allelic depths: Total number of reads (including partial, non-spanning, reads) supporting this allele."));
+    headerLines.add(
+        new VCFFormatHeaderLine(
+            "RU_SPAN",
+            VCFHeaderLineCount.A,
+            VCFHeaderLineType.Integer,
+            "Number of spanning reads per allele."));
   }
 
   private static void addContigHeaders(VCFHeader header, SAMSequenceDictionary dict) {
