@@ -117,6 +117,37 @@ class VcfUtilsTest {
   }
 
   @Test
+  void testCreateStrVcfLine_Coverage() {
+    IndexedFastaSequenceFile fasta = mock(IndexedFastaSequenceFile.class);
+    CatalogRepeatLocus catalogRepeatLocus = mock(CatalogRepeatLocus.class);
+    when(catalogRepeatLocus.catalogRepeatUnit()).thenReturn("AT");
+    when(catalogRepeatLocus.identifier()).thenReturn("STR1");
+    LocusKey key = new LocusKey("chr1", 100, 103);
+    Read full = mock(Read.class);
+    when(full.allele()).thenReturn("10.0");
+    when(full.readStatus()).thenReturn(ReadStatus.FULL);
+    when(full.actualRepeat()).thenReturn("AT");
+    Read partial = mock(Read.class);
+    when(partial.allele()).thenReturn("12.0");
+    when(partial.readStatus()).thenReturn(ReadStatus.PARTIAL);
+    when(partial.actualRepeat()).thenReturn("AT");
+    List<Read> reads = List.of(full, partial);
+
+    ReferenceSequence refSeq = mock(ReferenceSequence.class);
+    when(refSeq.getBaseString()).thenReturn("A");
+    when(fasta.getSubsequenceAt(anyString(), anyLong(), anyLong())).thenReturn(refSeq);
+
+    VariantContext vc =
+        VcfUtils.createStrVcfLine(
+            key, reads, List.of(), fasta, Map.of(key, catalogRepeatLocus), "SAMPLE");
+    assertEquals(Arrays.toString(new int[] {1, 1}), Arrays.toString(vc.getGenotype(0).getAD()));
+    assertEquals(
+        Arrays.toString(new int[] {0, 1}),
+        Arrays.toString((int[]) vc.getGenotype(0).getExtendedAttribute("RU_SPAN")));
+    assertEquals(2, vc.getGenotype(0).getExtendedAttribute("LC"));
+  }
+
+  @Test
   void testParseAlleleInt() {
     assertEquals(10, VcfUtils.parseAlleleInt("10.0"));
   }
