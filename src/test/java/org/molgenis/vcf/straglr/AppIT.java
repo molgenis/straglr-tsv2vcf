@@ -73,7 +73,7 @@ class AppIT {
     String outputFile = sharedTempDir.resolve("example.vcf").toString();
 
     String[] args = {
-        "-i", inputFile, "-l", lociFile, "-r", referenceFile, "-o", outputFile, "-s", "SAMPLE",
+      "-i", inputFile, "-l", lociFile, "-r", referenceFile, "-o", outputFile, "-s", "SAMPLE",
     };
     SpringApplication.run(App.class, args);
 

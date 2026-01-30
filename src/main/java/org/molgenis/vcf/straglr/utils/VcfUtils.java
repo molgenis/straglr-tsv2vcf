@@ -76,8 +76,18 @@ public class VcfUtils {
                 count ->
                     Allele.create(String.format("<STR%s>", Math.round(Float.parseFloat(count)))))
             .collect(Collectors.toSet());
-    GenotypesContext genotypes = buildGenotypes(locusKey, haploidContigs,
-        locusIdLookup, sampleName, alleles, reads, spanningReads, locusCoverage, alleleCounts, ad);
+    GenotypesContext genotypes =
+        buildGenotypes(
+            locusKey,
+            haploidContigs,
+            locusIdLookup,
+            sampleName,
+            alleles,
+            reads,
+            spanningReads,
+            locusCoverage,
+            alleleCounts,
+            ad);
 
     Map<String, Object> attributes = buildAttributes(locusKey, locusIdLookup.get(locusKey));
 
@@ -93,10 +103,17 @@ public class VcfUtils {
         .make();
   }
 
-  private static GenotypesContext buildGenotypes(LocusKey locusKey, List<String> haploidContigs,
-      Map<LocusKey, CatalogRepeatLocus> locusIdLookup, String sampleName, Set<Allele> alleles,
-      List<Read> reads, int[] spanningReads, int locusCoverage,
-      Map<String, List<Read>> alleleCounts, int[] ad) {
+  private static GenotypesContext buildGenotypes(
+      LocusKey locusKey,
+      List<String> haploidContigs,
+      Map<LocusKey, CatalogRepeatLocus> locusIdLookup,
+      String sampleName,
+      Set<Allele> alleles,
+      List<Read> reads,
+      int[] spanningReads,
+      int locusCoverage,
+      Map<String, List<Read>> alleleCounts,
+      int[] ad) {
     List<Allele> genotypeAlleles =
         determineGenotypeAlleles(alleles, locusKey.contig(), haploidContigs);
 
@@ -115,7 +132,8 @@ public class VcfUtils {
     formatAttributes.put("RU_CALL", actualRu);
     formatAttributes.put("RU_SEEN", getRepeatUnitsWithCounts(reads));
     formatAttributes.put(
-        "RU_MATCH", RepeatUnitUtils.isMatch(locusIdLookup.get(locusKey).catalogRepeatUnit(), actualRu) ? 1 : 0);
+        "RU_MATCH",
+        RepeatUnitUtils.isMatch(locusIdLookup.get(locusKey).catalogRepeatUnit(), actualRu) ? 1 : 0);
     formatAttributes.put("RU_NR", String.join(",", alleleCounts.keySet()));
     formatAttributes.put("RU_CI", confidenceIntervals);
 
@@ -168,7 +186,8 @@ public class VcfUtils {
     return genotypeAlleles;
   }
 
-  private static Map<String, Object> buildAttributes(LocusKey locusKey, CatalogRepeatLocus catalogRepeatLocus) {
+  private static Map<String, Object> buildAttributes(
+      LocusKey locusKey, CatalogRepeatLocus catalogRepeatLocus) {
     Map<String, Object> attributes = new LinkedHashMap<>();
     attributes.put("RU_CAT", catalogRepeatLocus.catalogRepeatUnit());
     attributes.put("REPID", catalogRepeatLocus.identifier());
@@ -260,7 +279,7 @@ public class VcfUtils {
     headerLines.add(
         new VCFFormatHeaderLine(
             "RU_CALL", 1, VCFHeaderLineType.String, "Most frequent actual repeat motif"));
-    //FORMAT does not allow FLAG fields
+    // FORMAT does not allow FLAG fields
     headerLines.add(
         new VCFFormatHeaderLine(
             "RU_MATCH",
