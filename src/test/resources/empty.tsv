@@ -1,0 +1,2 @@
+#2026-01-12_10:51:43 /straglr.py --loci /my_repeats.bed --sample SAMPLE --sex male --min_support 2 --min_cluster_size 2 vip.bam /GCA_000001405.15_GRCh38_no_alt_analysis_set.fna.gz straglr
+#chrom	start	end	target_repeat	locus	coverage	genotype	read_name	actual_repeat	copy_number	size	read_start	strand	allele	read_status

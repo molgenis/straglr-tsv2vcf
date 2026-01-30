@@ -1,0 +1,17 @@
+##fileformat=VCFv4.2
+##FORMAT=<ID=AD,Number=A,Type=Integer,Description="Allelic depths: Total number of reads (including partial, non-spanning, reads) supporting this allele.">
+##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
+##FORMAT=<ID=LC,Number=1,Type=Integer,Description="Locus coverage">
+##FORMAT=<ID=RU_CALL,Number=1,Type=String,Description="Most frequent actual repeat motif">
+##FORMAT=<ID=RU_CI,Number=A,Type=String,Description="95% confidence interval per allele. 'NA' if less than 2 reads were present.">
+##FORMAT=<ID=RU_MATCH,Number=1,Type=Integer,Description="RU call matches catalog (allowing shift/IUPAC), 1=match, 0=mismatch">
+##FORMAT=<ID=RU_NR,Number=A,Type=String,Description="Number of repeat units per allele.">
+##FORMAT=<ID=RU_SEEN,Number=.,Type=String,Description="All RUs encountered with read counts">
+##FORMAT=<ID=RU_SPAN,Number=A,Type=Integer,Description="Number of spanning reads per allele.">
+##INFO=<ID=END,Number=1,Type=Integer,Description="End position">
+##INFO=<ID=REPID,Number=1,Type=String,Description="Locus identifier.">
+##INFO=<ID=RU_CAT,Number=1,Type=String,Description="Catalog repeat motif">
+##INFO=<ID=SVTYPE,Number=1,Type=String,Description="Type of structural variant">
+##contig=<ID=1,length=101>
+##contig=<ID=2,length=101>
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	SAMPLE

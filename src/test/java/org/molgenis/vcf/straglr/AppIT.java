@@ -64,4 +64,24 @@ class AppIT {
 
     assertEquals(expectedOutputVcf, outputVcf);
   }
+
+  @Test
+  void testEmptyInput() throws IOException {
+    String inputFile = ResourceUtils.getFile("classpath:empty.tsv").toString();
+    String referenceFile = ResourceUtils.getFile("classpath:example.fasta.gz").toString();
+    String lociFile = ResourceUtils.getFile("classpath:example_loci.tsv").toString();
+    String outputFile = sharedTempDir.resolve("example.vcf").toString();
+
+    String[] args = {
+        "-i", inputFile, "-l", lociFile, "-r", referenceFile, "-o", outputFile, "-s", "SAMPLE",
+    };
+    SpringApplication.run(App.class, args);
+
+    String outputVcf = Files.readString(Path.of(outputFile));
+
+    Path expectedOutputFile = ResourceUtils.getFile("classpath:empty.vcf").toPath();
+    String expectedOutputVcf = Files.readString(expectedOutputFile).replaceAll("\\R", "\n");
+
+    assertEquals(expectedOutputVcf, outputVcf);
+  }
 }
