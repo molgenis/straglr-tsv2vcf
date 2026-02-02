@@ -70,12 +70,12 @@ public class VcfUtils {
             .mapToInt(List::size)
             .toArray();
 
-    Set<Allele> alleles =
+    List<Allele> alleles =
         alleleCounts.keySet().stream()
             .map(
                 count ->
                     Allele.create(String.format("<STR%s>", Math.round(Float.parseFloat(count)))))
-            .collect(Collectors.toSet());
+            .toList();
     GenotypesContext genotypes =
         buildGenotypes(
             locusKey,
@@ -108,18 +108,16 @@ public class VcfUtils {
       List<String> haploidContigs,
       Map<LocusKey, CatalogRepeatLocus> locusIdLookup,
       String sampleName,
-      Set<Allele> alleles,
+      List<Allele> alleles,
       List<Read> reads,
       int[] spanningReads,
       int locusCoverage,
-      Map<String, List<Read>> alleleCounts,
+      Map<String, List<Read>> readsByAllele,
       int[] ad) {
     List<Allele> genotypeAlleles =
         determineGenotypeAlleles(alleles, locusKey.contig(), haploidContigs);
 
     String actualRu = getMostFrequentActualRepeat(reads);
-    Map<String, List<Read>> readsByAllele =
-        reads.stream().collect(Collectors.groupingBy(Read::allele));
 
     String confidenceIntervals =
         readsByAllele.values().stream()
@@ -134,7 +132,11 @@ public class VcfUtils {
     formatAttributes.put(
         "RU_MATCH",
         RepeatUnitUtils.isMatch(locusIdLookup.get(locusKey).catalogRepeatUnit(), actualRu) ? 1 : 0);
-    formatAttributes.put("RU_NR", String.join(",", alleleCounts.keySet()));
+    formatAttributes.put(
+        "RU_NR",
+        readsByAllele.keySet().stream()
+            .map(count -> Math.round(Double.parseDouble(count)))
+            .toList());
     formatAttributes.put("RU_CI", confidenceIntervals);
 
     GenotypesContext genotypes =
@@ -160,8 +162,8 @@ public class VcfUtils {
         .collect(
             Collectors.groupingBy(
                 Read::allele,
-                Collectors.mapping(read -> read, Collectors.toList()) // List<Read> per allele
-                ));
+                LinkedHashMap::new,
+                Collectors.mapping(read -> read, Collectors.toList())));
   }
 
   private static List<String> collectFilters(List<Read> reads) {
@@ -174,7 +176,7 @@ public class VcfUtils {
   }
 
   private static List<Allele> determineGenotypeAlleles(
-      Set<Allele> alleles, String contig, List<String> haploidContigs) {
+      List<Allele> alleles, String contig, List<String> haploidContigs) {
 
     List<Allele> genotypeAlleles = new ArrayList<>(alleles);
 
