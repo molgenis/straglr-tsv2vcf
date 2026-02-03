@@ -13,7 +13,7 @@
 
   <groupId>org.molgenis</groupId>
   <artifactId>straglr-tsv2vcf</artifactId>
-  <version>1.1.0</version>
+  <version>1.2.0</version>
 
   <name>straglr-tsv2vcf</name>
   <description>Java tool to create a vcf from the straglr tsv output</description>
