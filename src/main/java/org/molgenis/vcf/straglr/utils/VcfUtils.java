@@ -29,7 +29,6 @@ import htsjdk.variant.vcf.VCFInfoHeaderLine;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -124,7 +123,7 @@ public class VcfUtils {
             .map(readList -> calculateConfidenceInterval(readList, 0.95))
             .collect(Collectors.joining(","));
 
-    Map<String, Object> formatAttributes = new HashMap<>();
+    Map<String, Object> formatAttributes = new LinkedHashMap<>();
     formatAttributes.put("RU_SPAN", spanningReads);
     formatAttributes.put("LC", locusCoverage);
     formatAttributes.put("RU_CALL", actualRu);
