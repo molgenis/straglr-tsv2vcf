@@ -1,8 +1,4 @@
 ##fileformat=VCFv4.2
-##ALT=<ID=STR17,Description="Short tandem repeat (STR) allele of length 17.">
-##ALT=<ID=STR20,Description="Short tandem repeat (STR) allele of length 20.">
-##ALT=<ID=STR9,Description="Short tandem repeat (STR) allele of length 9.">
-##FILTER=<ID=PASS,Description="PASS">
 ##FORMAT=<ID=AD,Number=A,Type=Integer,Description="Allelic depths: Total number of reads (including partial, non-spanning, reads) supporting this allele.">
 ##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
 ##FORMAT=<ID=LC,Number=1,Type=Integer,Description="Locus coverage">
@@ -19,5 +15,3 @@
 ##contig=<ID=1,length=101>
 ##contig=<ID=2,length=101>
 #CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	SAMPLE
-1	2	.	T	<STR20>,<STR9>	.	PASS	END=10;REPID=AR;RU_CAT=GCA;SVTYPE=STR	GT:AD:LC:RU_CALL:RU_CI:RU_MATCH:RU_NR:RU_SEEN:RU_SPAN	1/2:2,2:4:GGC:11.4-24.2,6.5-10.4:0:20,9:GGC(4):2,2
-2	2	.	T	<STR17>	.	PASS	END=11;REPID=ATN1;RU_CAT=CNG;SVTYPE=STR	GT:AD:LC:RU_CALL:RU_CI:RU_MATCH:RU_NR:RU_SEEN:RU_SPAN	1/1:4:4:CAG:14.3-20.0:1:17:CAG(4):3

@@ -69,27 +69,26 @@ public class VcfUtils {
             .mapToInt(List::size)
             .toArray();
 
-    Set<Allele> alleles =
+    List<Allele> alleles =
         alleleCounts.keySet().stream()
             .map(
                 count ->
                     Allele.create(String.format("<STR%s>", Math.round(Float.parseFloat(count)))))
-            .collect(Collectors.toSet());
-    List<Allele> genotypeAlleles =
-        determineGenotypeAlleles(alleles, locusKey.contig(), haploidContigs);
-
-    Map<String, Object> formatAttributes = Map.of("RU_SPAN", spanningReads, "LC", locusCoverage);
-
+            .toList();
     GenotypesContext genotypes =
-        GenotypesContext.create(
-            new GenotypeBuilder(sampleName)
-                .alleles(genotypeAlleles)
-                .AD(ad)
-                .attributes(formatAttributes)
-                .make());
+        buildGenotypes(
+            locusKey,
+            haploidContigs,
+            locusIdLookup,
+            sampleName,
+            alleles,
+            reads,
+            spanningReads,
+            locusCoverage,
+            alleleCounts,
+            ad);
 
-    Map<String, Object> attributes =
-        buildAttributes(locusKey, reads, locusIdLookup.get(locusKey), alleleCounts.keySet());
+    Map<String, Object> attributes = buildAttributes(locusKey, locusIdLookup.get(locusKey));
 
     List<Allele> allAlleles = new ArrayList<>();
     allAlleles.add(refAllele);
@@ -101,6 +100,52 @@ public class VcfUtils {
         .genotypes(genotypes)
         .filter(filters.isEmpty() ? "PASS" : String.join(";", filters))
         .make();
+  }
+
+  private static GenotypesContext buildGenotypes(
+      LocusKey locusKey,
+      List<String> haploidContigs,
+      Map<LocusKey, CatalogRepeatLocus> locusIdLookup,
+      String sampleName,
+      List<Allele> alleles,
+      List<Read> reads,
+      int[] spanningReads,
+      int locusCoverage,
+      Map<String, List<Read>> readsByAllele,
+      int[] ad) {
+    List<Allele> genotypeAlleles =
+        determineGenotypeAlleles(alleles, locusKey.contig(), haploidContigs);
+
+    String actualRu = getMostFrequentActualRepeat(reads);
+
+    String confidenceIntervals =
+        readsByAllele.values().stream()
+            .map(readList -> calculateConfidenceInterval(readList, 0.95))
+            .collect(Collectors.joining(","));
+
+    Map<String, Object> formatAttributes = new LinkedHashMap<>();
+    formatAttributes.put("RU_SPAN", spanningReads);
+    formatAttributes.put("LC", locusCoverage);
+    formatAttributes.put("RU_CALL", actualRu);
+    formatAttributes.put("RU_SEEN", getRepeatUnitsWithCounts(reads));
+    formatAttributes.put(
+        "RU_MATCH",
+        RepeatUnitUtils.isMatch(locusIdLookup.get(locusKey).catalogRepeatUnit(), actualRu) ? 1 : 0);
+    formatAttributes.put(
+        "RU_NR",
+        readsByAllele.keySet().stream()
+            .map(count -> Math.round(Double.parseDouble(count)))
+            .toList());
+    formatAttributes.put("RU_CI", confidenceIntervals);
+
+    GenotypesContext genotypes =
+        GenotypesContext.create(
+            new GenotypeBuilder(sampleName)
+                .alleles(genotypeAlleles)
+                .AD(ad)
+                .attributes(formatAttributes)
+                .make());
+    return genotypes;
   }
 
   private static Allele createRefAllele(LocusKey locusKey, ReferenceSequenceFile fasta) {
@@ -116,8 +161,8 @@ public class VcfUtils {
         .collect(
             Collectors.groupingBy(
                 Read::allele,
-                Collectors.mapping(read -> read, Collectors.toList()) // List<Read> per allele
-                ));
+                LinkedHashMap::new,
+                Collectors.mapping(read -> read, Collectors.toList())));
   }
 
   private static List<String> collectFilters(List<Read> reads) {
@@ -130,7 +175,7 @@ public class VcfUtils {
   }
 
   private static List<Allele> determineGenotypeAlleles(
-      Set<Allele> alleles, String contig, List<String> haploidContigs) {
+      List<Allele> alleles, String contig, List<String> haploidContigs) {
 
     List<Allele> genotypeAlleles = new ArrayList<>(alleles);
 
@@ -143,30 +188,11 @@ public class VcfUtils {
   }
 
   private static Map<String, Object> buildAttributes(
-      LocusKey locusKey,
-      List<Read> reads,
-      CatalogRepeatLocus catalogRepeatLocus,
-      Set<String> repeatUnitCounts) {
-
-    String actualRu = getMostFrequentActualRepeat(reads);
-    Map<String, List<Read>> readsByAllele =
-        reads.stream().collect(Collectors.groupingBy(Read::allele));
-
-    String confidenceIntervals =
-        readsByAllele.values().stream()
-            .map(readList -> calculateConfidenceInterval(readList, 0.95))
-            .collect(Collectors.joining(","));
-
+      LocusKey locusKey, CatalogRepeatLocus catalogRepeatLocus) {
     Map<String, Object> attributes = new LinkedHashMap<>();
-    attributes.put("END", locusKey.stop());
-    attributes.put("RU_CALL", actualRu);
     attributes.put("RU_CAT", catalogRepeatLocus.catalogRepeatUnit());
-    attributes.put("RU_SEEN", getRepeatUnitsWithCounts(reads));
     attributes.put("REPID", catalogRepeatLocus.identifier());
-    attributes.put(
-        "RU_MATCH", RepeatUnitUtils.isMatch(catalogRepeatLocus.catalogRepeatUnit(), actualRu));
-    attributes.put("RU_NR", String.join(",", repeatUnitCounts));
-    attributes.put("RU_CI", confidenceIntervals);
+    attributes.put("END", locusKey.stop());
     // Used in vip-report
     attributes.put("SVTYPE", "STR");
 
@@ -228,36 +254,9 @@ public class VcfUtils {
   private static void addInfoHeaders(Set<VCFHeaderLine> headerLines) {
     headerLines.add(new VCFInfoHeaderLine("END", 1, VCFHeaderLineType.Integer, "End position"));
     headerLines.add(
-        new VCFInfoHeaderLine(
-            "RU_CALL", 1, VCFHeaderLineType.String, "Most frequent actual repeat motif"));
-    headerLines.add(
         new VCFInfoHeaderLine("RU_CAT", 1, VCFHeaderLineType.String, "Catalog repeat motif"));
     headerLines.add(
         new VCFInfoHeaderLine("REPID", 1, VCFHeaderLineType.String, "Locus identifier."));
-    headerLines.add(
-        new VCFInfoHeaderLine(
-            "RU_MATCH",
-            0,
-            VCFHeaderLineType.Flag,
-            "RU call matches catalog (allowing shift/IUPAC)"));
-    headerLines.add(
-        new VCFInfoHeaderLine(
-            "RU_SEEN",
-            VCFHeaderLineCount.UNBOUNDED,
-            VCFHeaderLineType.String,
-            "All RUs encountered with read counts"));
-    headerLines.add(
-        new VCFInfoHeaderLine(
-            "RU_NR",
-            VCFHeaderLineCount.A,
-            VCFHeaderLineType.String,
-            "Number of repeat units per allele."));
-    headerLines.add(
-        new VCFInfoHeaderLine(
-            "RU_CI",
-            VCFHeaderLineCount.A,
-            VCFHeaderLineType.String,
-            "95% confidence interval per allele. 'NA' if less than 2 reads were present."));
     // Used in vip-report
     headerLines.add(
         new VCFInfoHeaderLine("SVTYPE", 1, VCFHeaderLineType.String, "Type of structural variant"));
@@ -278,6 +277,34 @@ public class VcfUtils {
             VCFHeaderLineCount.A,
             VCFHeaderLineType.Integer,
             "Number of spanning reads per allele."));
+    headerLines.add(
+        new VCFFormatHeaderLine(
+            "RU_CALL", 1, VCFHeaderLineType.String, "Most frequent actual repeat motif"));
+    // FORMAT does not allow FLAG fields
+    headerLines.add(
+        new VCFFormatHeaderLine(
+            "RU_MATCH",
+            1,
+            VCFHeaderLineType.Integer,
+            "RU call matches catalog (allowing shift/IUPAC), 1=match, 0=mismatch"));
+    headerLines.add(
+        new VCFFormatHeaderLine(
+            "RU_SEEN",
+            VCFHeaderLineCount.UNBOUNDED,
+            VCFHeaderLineType.String,
+            "All RUs encountered with read counts"));
+    headerLines.add(
+        new VCFFormatHeaderLine(
+            "RU_NR",
+            VCFHeaderLineCount.A,
+            VCFHeaderLineType.String,
+            "Number of repeat units per allele."));
+    headerLines.add(
+        new VCFFormatHeaderLine(
+            "RU_CI",
+            VCFHeaderLineCount.A,
+            VCFHeaderLineType.String,
+            "95% confidence interval per allele. 'NA' if less than 2 reads were present."));
   }
 
   private static void addContigHeaders(VCFHeader header, SAMSequenceDictionary dict) {

@@ -46,7 +46,7 @@ public class FileUtils {
     } catch (IOException e) {
       throw new UncheckedIOException(e);
     }
-    throw new IllegalStateException("No data lines found for straglr tsv.");
+    return skipLines - 1; // Header only file, no str calls
   }
 
   public static Map<LocusKey, CatalogRepeatLocus> readLoci(Path input) {

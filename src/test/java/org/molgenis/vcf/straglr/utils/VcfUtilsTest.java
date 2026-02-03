@@ -61,7 +61,7 @@ class VcfUtilsTest {
     assertEquals("PASS", vc.getFilters().stream().findFirst().get());
     assertEquals(1, vc.getGenotypes().size());
     assertEquals(103, vc.getAttributeAsInt("END", 0));
-    assertTrue((Boolean) vc.getAttribute("RU_MATCH"));
+    assertEquals(1, vc.getGenotype(0).getExtendedAttribute("RU_MATCH"));
   }
 
   @Test
@@ -141,8 +141,9 @@ class VcfUtilsTest {
         VcfUtils.createStrVcfLine(
             key, reads, List.of(), fasta, Map.of(key, catalogRepeatLocus), "SAMPLE");
     assertEquals(Arrays.toString(new int[] {1, 1}), Arrays.toString(vc.getGenotype(0).getAD()));
+    assertEquals(List.of(10L, 12L), vc.getGenotype(0).getExtendedAttribute("RU_NR"));
     assertEquals(
-        Arrays.toString(new int[] {0, 1}),
+        Arrays.toString(new int[] {1, 0}),
         Arrays.toString((int[]) vc.getGenotype(0).getExtendedAttribute("RU_SPAN")));
     assertEquals(2, vc.getGenotype(0).getExtendedAttribute("LC"));
   }
