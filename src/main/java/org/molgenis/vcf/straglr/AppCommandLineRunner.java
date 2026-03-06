@@ -115,7 +115,6 @@ class AppCommandLineRunner implements CommandLineRunner {
   }
 
   private void printUsage() {
-    System.out.println();
     HelpFormatter formatter = HelpFormatter.builder().get();
     String cmdLineSyntax = "java -jar " + appName + ".jar";
 
