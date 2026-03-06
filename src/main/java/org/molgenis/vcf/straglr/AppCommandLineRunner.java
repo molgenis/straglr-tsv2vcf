@@ -79,6 +79,7 @@ class AppCommandLineRunner implements CommandLineRunner {
     }
   }
 
+  @SuppressWarnings("NullAway")
   private CommandLine getCommandLine(String[] args) {
     CommandLine commandLine = null;
     try {

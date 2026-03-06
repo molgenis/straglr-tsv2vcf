@@ -149,11 +149,6 @@ class VcfUtilsTest {
   }
 
   @Test
-  void testParseAlleleInt() {
-    assertEquals(10, VcfUtils.parseAlleleInt("10.0"));
-  }
-
-  @Test
   void testVariantComparator() {
     VariantContext vc1 =
         new VariantContextBuilder("test", "chr1", 100, 100, List.of(Allele.REF_A)).make();

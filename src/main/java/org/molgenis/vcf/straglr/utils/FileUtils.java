@@ -17,12 +17,8 @@ import org.molgenis.vcf.straglr.model.CatalogLine;
 import org.molgenis.vcf.straglr.model.CatalogRepeatLocus;
 import org.molgenis.vcf.straglr.model.LocusKey;
 import org.molgenis.vcf.straglr.model.StraglrTsvLine;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class FileUtils {
-  private static final Logger LOGGER = LoggerFactory.getLogger(FileUtils.class);
-
   private FileUtils() {}
 
   public static List<StraglrTsvLine> readTsv(Path input) {

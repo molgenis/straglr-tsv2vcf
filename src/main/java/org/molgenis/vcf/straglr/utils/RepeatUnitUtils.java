@@ -69,7 +69,7 @@ public class RepeatUnitUtils {
         .stream()
         .max(Map.Entry.comparingByValue())
         .map(Map.Entry::getKey)
-        .orElse(null);
+        .orElseThrow();
   }
 
   static List<String> getRepeatUnitsWithCounts(List<Read> reads) {

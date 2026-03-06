@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.jspecify.annotations.Nullable;
 import org.molgenis.vcf.straglr.model.CatalogRepeatLocus;
 import org.molgenis.vcf.straglr.model.LocusKey;
 import org.molgenis.vcf.straglr.model.Read;
@@ -42,7 +43,7 @@ import org.molgenis.vcf.straglr.model.ReadStatus;
 
 public class VcfUtils {
 
-  public static VariantContext createStrVcfLine(
+  public static @Nullable VariantContext createStrVcfLine(
       LocusKey locusKey,
       List<Read> inputReads,
       List<String> haploidContigs,
@@ -88,6 +89,10 @@ public class VcfUtils {
             alleleCounts,
             ad);
 
+    if (locusIdLookup.get(locusKey) == null) {
+      throw new UnknownLocusException(locusKey);
+    }
+
     Map<String, Object> attributes = buildAttributes(locusKey, locusIdLookup.get(locusKey));
 
     List<Allele> allAlleles = new ArrayList<>();
@@ -122,6 +127,10 @@ public class VcfUtils {
         readsByAllele.values().stream()
             .map(readList -> calculateConfidenceInterval(readList, 0.95))
             .collect(Collectors.joining(","));
+    CatalogRepeatLocus locusId = locusIdLookup.get(locusKey);
+    if (locusId == null) {
+      throw new UnknownLocusException(locusKey);
+    }
 
     Map<String, Object> formatAttributes = new LinkedHashMap<>();
     formatAttributes.put("RU_SPAN", spanningReads);
@@ -129,8 +138,7 @@ public class VcfUtils {
     formatAttributes.put("RU_CALL", actualRu);
     formatAttributes.put("RU_SEEN", getRepeatUnitsWithCounts(reads));
     formatAttributes.put(
-        "RU_MATCH",
-        RepeatUnitUtils.isMatch(locusIdLookup.get(locusKey).catalogRepeatUnit(), actualRu) ? 1 : 0);
+        "RU_MATCH", RepeatUnitUtils.isMatch(locusId.catalogRepeatUnit(), actualRu) ? 1 : 0);
     formatAttributes.put(
         "RU_NR",
         readsByAllele.keySet().stream()
@@ -138,14 +146,12 @@ public class VcfUtils {
             .toList());
     formatAttributes.put("RU_CI", confidenceIntervals);
 
-    GenotypesContext genotypes =
-        GenotypesContext.create(
-            new GenotypeBuilder(sampleName)
-                .alleles(genotypeAlleles)
-                .AD(ad)
-                .attributes(formatAttributes)
-                .make());
-    return genotypes;
+    return GenotypesContext.create(
+        new GenotypeBuilder(sampleName)
+            .alleles(genotypeAlleles)
+            .AD(ad)
+            .attributes(formatAttributes)
+            .make());
   }
 
   private static Allele createRefAllele(LocusKey locusKey, ReferenceSequenceFile fasta) {
@@ -197,10 +203,6 @@ public class VcfUtils {
     attributes.put("SVTYPE", "STR");
 
     return attributes;
-  }
-
-  static int parseAlleleInt(String alleleStr) {
-    return Math.round(Float.parseFloat(alleleStr.trim()));
   }
 
   public static Comparator<VariantContext> variantComparator() {
