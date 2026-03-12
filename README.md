@@ -4,6 +4,9 @@ This tool creates a VCF 4.2 file (for htsjdk support in downstream tools) in a f
 The VCF output of the straglr tool itself is VCF 4.5 that cannot be used downstream in VIP and the content is not suitable for Stranger.
 Since the catalog bed file is required to create the VCF this tool is only suitable for usage with output of straglr in the "targetted" mode, and not for the "genome scan" mode.
 
+## Requirements
+- Java 25
+
 ## Usage
 ``` 
 usage: java -jar straglrTsv2Vcf.jar -i <arg> -l <arg> -r <arg> [-c <arg>]
