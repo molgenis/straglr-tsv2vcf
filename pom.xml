@@ -328,6 +328,20 @@
           </execution>
         </executions>
       </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>${maven.surefire.plugin.version}</version>
+        <configuration>
+          <argLine>@.mvn/jvm.config -javaagent:"${org.mockito:mockito-core:jar}" ${argLine}</argLine>
+          <includes>
+            <include>**/*Test.java</include>
+          </includes>
+          <statelessTestsetReporter>
+            <disable>true</disable>
+          </statelessTestsetReporter>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
 
