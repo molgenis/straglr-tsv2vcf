@@ -25,7 +25,7 @@ public class StatisticsUtils {
 
     DescriptiveStatistics stats = new DescriptiveStatistics(ruCounts);
     double mean = stats.getMean();
-    double sem = stats.getStandardDeviation() / Math.sqrt(stats.getN());
+    double sem = stats.getStandardDeviation() / Math.sqrt((double) stats.getN());
     TDistribution tDist = new TDistribution(stats.getN() - 1);
     double margin = tDist.inverseCumulativeProbability((1 + confidenceLevel) / 2) * sem;
 
