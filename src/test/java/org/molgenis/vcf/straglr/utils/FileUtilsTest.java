@@ -3,6 +3,7 @@ package org.molgenis.vcf.straglr.utils;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -44,6 +45,43 @@ class FileUtilsTest {
     assertEquals("full", line.getReadStatus());
     assertEquals("GGC", line.getTargetRepeat());
     assertEquals("GGC", line.getActualRepeat());
+  }
+
+  @Test
+  void testReadTsvInvalid() throws IOException {
+    String tsv =
+        """
+      #header line that should be skipped
+      #chrom\tstart\tend\ttarget_repeat\tlocus\tcoverage\tgenotype\tread_name\tactual_repeat\tcopy_number\tsize\tread_start\tstrand\tallele\tread_status
+      chr1\t149390802\tGGC\tchr1:149390802-149390841\t33\t20.0(19);8.5(14)\t04d31d3d-91e4-4a6a-9e95-2c9d50c99295\tGGC\t20.3\t61\t3881\t-\t20.0\tfull
+      """;
+
+    Path file = tempDir.resolve("input.tsv");
+    Files.writeString(file, tsv);
+
+    Exception e = assertThrows(IllegalStateException.class, () -> FileUtils.readTsv(file));
+    assertEquals(
+        "CSV parse error at line 3: Number of data fields does not match number of headers.",
+        e.getMessage());
+  }
+
+  @Test
+  void testReadTsvNoHeader() throws IOException {
+    String tsv =
+        """
+      chr1\t149390802\t149390841\tGGC\tchr1:149390802-149390841\t33\t20.0(19);8.5(14)\t04d31d3d-91e4-4a6a-9e95-2c9d50c99295\tGGC\t20.3\t61\t3881\t-\t20.0\tfull
+      """;
+
+    Path file = tempDir.resolve("input.tsv");
+    Files.writeString(file, tsv);
+    Exception e = assertThrows(IllegalStateException.class, () -> FileUtils.readTsv(file));
+    assertEquals("No header lines found for straglr tsv.", e.getMessage());
+  }
+
+  @Test
+  void testReadTsvNoFile() {
+    Path file = tempDir.resolve("input.tsv");
+    assertThrows(UncheckedIOException.class, () -> FileUtils.readTsv(file));
   }
 
   @Test

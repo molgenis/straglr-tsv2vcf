@@ -23,6 +23,7 @@ class RepeatUnitUtilsTest {
     "R, A, true",
     "R, T, false",
     "N, T, true",
+    "ACG, CG, false",
     "ACG, ACG, true",
     "ACG, GAC, true",
     "ACG, CGA, true",

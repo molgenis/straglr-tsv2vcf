@@ -1,6 +1,9 @@
 package org.molgenis.vcf.straglr.utils;
 
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.List;
+import java.util.Locale;
 import org.apache.commons.math3.distribution.TDistribution;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.molgenis.vcf.straglr.model.Read;
@@ -22,13 +25,14 @@ public class StatisticsUtils {
 
     DescriptiveStatistics stats = new DescriptiveStatistics(ruCounts);
     double mean = stats.getMean();
-    double sem = stats.getStandardDeviation() / Math.sqrt(stats.getN());
+    double sem = stats.getStandardDeviation() / Math.sqrt((double) stats.getN());
     TDistribution tDist = new TDistribution(stats.getN() - 1);
     double margin = tDist.inverseCumulativeProbability((1 + confidenceLevel) / 2) * sem;
 
     double lower = mean - margin;
     double upper = mean + margin;
 
-    return String.format("%.1f-%.1f", lower, upper);
+    DecimalFormat df = new DecimalFormat("0.0", new DecimalFormatSymbols(Locale.getDefault()));
+    return String.format("%s-%s", df.format(lower), df.format(upper));
   }
 }

@@ -2,6 +2,7 @@ package org.molgenis.vcf.straglr.utils;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -33,8 +34,8 @@ public class RepeatUnitUtils {
 
   public static boolean isMatch(String catalogRU, String calledRU) {
     if (catalogRU == null || calledRU == null) return false;
-    catalogRU = catalogRU.toUpperCase();
-    calledRU = calledRU.toUpperCase();
+    catalogRU = catalogRU.toUpperCase(Locale.ROOT);
+    calledRU = calledRU.toUpperCase(Locale.ROOT);
 
     if (catalogRU.length() != calledRU.length()) return false;
     int n = catalogRU.length();
@@ -69,7 +70,7 @@ public class RepeatUnitUtils {
         .stream()
         .max(Map.Entry.comparingByValue())
         .map(Map.Entry::getKey)
-        .orElse(null);
+        .orElseThrow();
   }
 
   static List<String> getRepeatUnitsWithCounts(List<Read> reads) {

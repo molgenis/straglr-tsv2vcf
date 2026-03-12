@@ -1,5 +1,7 @@
 package org.molgenis.vcf.straglr.model;
 
+import java.util.Locale;
+
 public enum ReadStatus {
   FULL,
   PARTIAL,
@@ -11,7 +13,7 @@ public enum ReadStatus {
       return ReadStatus.SKIPPED;
     }
 
-    String clean = tsvValue.trim().toUpperCase();
+    String clean = tsvValue.trim().toUpperCase(Locale.ROOT);
     if (clean.startsWith("FULL")) {
       return ReadStatus.FULL;
     }

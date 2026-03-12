@@ -1,6 +1,8 @@
 package org.molgenis.vcf.straglr.model;
 
 /**
+ * Catalog repeat locus
+ *
  * @param chrom contig identifier
  * @param start 1 based start position, based on straglr loci (catalog) file
  * @param stop 1 based stop position, inclusive, based on straglr loci (catalog) file

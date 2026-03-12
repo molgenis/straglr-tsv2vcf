@@ -79,6 +79,7 @@ class AppCommandLineRunner implements CommandLineRunner {
     }
   }
 
+  @SuppressWarnings("NullAway")
   private CommandLine getCommandLine(String[] args) {
     CommandLine commandLine = null;
     try {
@@ -114,7 +115,6 @@ class AppCommandLineRunner implements CommandLineRunner {
   }
 
   private void printUsage() {
-    System.out.println();
     HelpFormatter formatter = HelpFormatter.builder().get();
     String cmdLineSyntax = "java -jar " + appName + ".jar";
 

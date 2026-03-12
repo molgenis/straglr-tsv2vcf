@@ -1,0 +1,28 @@
+ usage:  java -jar straglrTsv2Vcf.jar [-c <arg>] [-f] -i <arg> -l <arg> [-o
+    <arg>] -r <arg> -s <arg>
+
+           Options               Since                Description
+ -i, --input <arg>                --       Straglr tsv file.
+ -l, --loci <arg>                 --       Loci (catalog) file used for
+                                            running straglr (.tsv).
+ -r, --reference <arg>            --       Bgzipped reference sequence file
+                                            (.fna.gz, or fasta.gz).
+ -c, --haploid_contigs <arg>      --       Comma separated list of haploid
+                                            contigs.
+ -s, --sample <arg>               --       Sample name to be used in the
+                                            VCF.
+ -o, --output <arg>               --       Output file (.vcf or .vcf.gz).
+ -f, --force                      --       Override the output file if it
+                                            already exists.
+
+
+ usage:  java -jar straglrTsv2Vcf.jar -v
+
+    Options        Since      Description
+ -v, --version      --       Print version.
+
+
+ usage:  java -jar straglrTsv2Vcf.jar -h
+
+  Options       Since     Description
+ -h, --help      --       Print usage.
