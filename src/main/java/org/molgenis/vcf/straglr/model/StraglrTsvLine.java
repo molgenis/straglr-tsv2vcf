@@ -1,10 +1,13 @@
 package org.molgenis.vcf.straglr.model;
 
 import com.opencsv.bean.CsvBindByName;
+import com.opencsv.bean.CsvCustomBindByName;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.molgenis.vcf.straglr.utils.NaAsNullDoubleConverter;
+import org.molgenis.vcf.straglr.utils.NaAsNullIntegerConverter;
 
 @Data
 @NoArgsConstructor
@@ -16,12 +19,18 @@ public class StraglrTsvLine {
   String chrom;
 
   /** 0-based start coordinate of locus */
-  @CsvBindByName(column = "start", required = true)
-  int start;
+  @CsvCustomBindByName(
+      column = "start",
+      required = true,
+      converter = NaAsNullIntegerConverter.class)
+  Integer start;
 
   /** 0-based, exclusive, end coordinate of locus */
-  @CsvBindByName(column = "end", required = true)
-  int end;
+  @CsvCustomBindByName(
+      column = "end",
+      required = true,
+      converter = NaAsNullIntegerConverter.class)
+  Integer end;
 
   /** consensus(shortest) repeat motif from genome scan or target motif in genotyping */
   @CsvBindByName(column = "target_repeat", required = true)
@@ -32,7 +41,10 @@ public class StraglrTsvLine {
   String locus;
 
   /** coverage depth of locus */
-  @CsvBindByName(column = "coverage", required = true)
+  @CsvCustomBindByName(
+      column = "coverage",
+      required = true,
+      converter = NaAsNullIntegerConverter.class)
   int coverage;
 
   /**
@@ -54,15 +66,24 @@ public class StraglrTsvLine {
   String actualRepeat;
 
   /** number of copies of repeat in allele */
-  @CsvBindByName(column = "copy_number", required = true)
-  double copyNumber;
+  @CsvCustomBindByName(
+      column = "copy_number",
+      required = true,
+      converter = NaAsNullDoubleConverter.class)
+  Double copyNumber;
 
   /** size of allele */
-  @CsvBindByName(column = "size", required = true)
-  double size;
+  @CsvCustomBindByName(
+      column = "size",
+      required = true,
+      converter = NaAsNullDoubleConverter.class)
+  Double size;
 
   /** start position of repeat in support read */
-  @CsvBindByName(column = "read_start", required = true)
+  @CsvCustomBindByName(
+      column = "read_start",
+      required = true,
+      converter = NaAsNullIntegerConverter.class)
   int readStart;
 
   /** strand of reference genome from which read originates */

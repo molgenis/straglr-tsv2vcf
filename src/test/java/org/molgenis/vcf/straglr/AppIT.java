@@ -94,7 +94,7 @@ class AppIT {
   void testVersion(CapturedOutput output) {
     String[] args = {"-v"};
     SpringApplication.run(App.class, args);
-    assertEquals("straglrTsv2Vcf 1.2.0\n", output.getAll().replaceAll("\\R", "\n"));
+    assertEquals("straglrTsv2Vcf 1.2.1\n", output.getAll().replaceAll("\\R", "\n"));
   }
 
   @Test

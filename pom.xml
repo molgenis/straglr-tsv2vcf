@@ -38,6 +38,7 @@
   </issueManagement>
 
   <properties>
+    <argLine/>
     <java.version>25</java.version>
     <commons.cli.version>1.11.0</commons.cli.version>
     <commons.math3.version>3.6.1</commons.math3.version>
@@ -329,10 +330,25 @@
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-failsafe-plugin</artifactId>
+        <executions>
+          <execution>
+            <goals>
+              <goal>integration-test</goal>
+              <goal>verify</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <argLine>@.mvn/jvm.config @{argLine}</argLine>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <version>${maven.surefire.plugin.version}</version>
         <configuration>
-          <argLine>@.mvn/jvm.config -javaagent:"${org.mockito:mockito-core:jar}" ${argLine}</argLine>
+          <argLine>@.mvn/jvm.config -javaagent:"${org.mockito:mockito-core:jar}" @{argLine}</argLine>
           <includes>
             <include>**/*Test.java</include>
           </includes>
