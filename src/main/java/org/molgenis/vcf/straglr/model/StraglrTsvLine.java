@@ -26,10 +26,7 @@ public class StraglrTsvLine {
   Integer start;
 
   /** 0-based, exclusive, end coordinate of locus */
-  @CsvCustomBindByName(
-      column = "end",
-      required = true,
-      converter = NaAsNullIntegerConverter.class)
+  @CsvCustomBindByName(column = "end", required = true, converter = NaAsNullIntegerConverter.class)
   Integer end;
 
   /** consensus(shortest) repeat motif from genome scan or target motif in genotyping */
@@ -73,10 +70,7 @@ public class StraglrTsvLine {
   Double copyNumber;
 
   /** size of allele */
-  @CsvCustomBindByName(
-      column = "size",
-      required = true,
-      converter = NaAsNullDoubleConverter.class)
+  @CsvCustomBindByName(column = "size", required = true, converter = NaAsNullDoubleConverter.class)
   Double size;
 
   /** start position of repeat in support read */
